@@ -27,3 +27,14 @@ git checkout  -- index.txt
 git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”
 git checkout -- index.txt ， git checkout -- . (.是全部)
 
+
+branch 
+git branch dev 增加 dev
+pull
+git add .
+git commit -m ""
+git push --set-upstream origin dev
+
+
+merge合并分区到当前分区
+git merge dev (把dev分区合并到当前分区)
