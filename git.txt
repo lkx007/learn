@@ -38,3 +38,4 @@ git push --set-upstream origin dev
 
 merge合并分区到当前分区
 git merge dev (把dev分区合并到当前分区)
+git push
