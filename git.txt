@@ -7,3 +7,14 @@ git
 	(2) cat ~/.ssh/id_rsa.pub 
 	
 4.只把这个项目不用密码 可以在   项目下./git/config 修改路由带上帐号和密码  ：url = https://allen0817:aaaa623450@github.com/allen0817/learn.git	
+
+url = https://allen0817:aaaa623450@github.com/allen0817/learn.git
+
+
+
+本地回退
+git reset --hard 53544(git hash号，不用写完)
+
+查看命令历史
+git reflog(可以查看回退后前提交的一些hash号 ，即git log 查看没有的hash)
+
