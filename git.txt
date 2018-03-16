@@ -18,3 +18,7 @@ git reset --hard 53544(git hash号，不用写完)
 查看命令历史
 git reflog(可以查看回退后前提交的一些hash号 ，即git log 查看没有的hash)
 
+diff 查看文件差异
+git diff 版本hash号 -- 文件 例： git diff HEAD -- index.txt ,  git diff 04574 -- index.txt
+
+
