@@ -1,0 +1,171 @@
+php install 
+
+	wget http://www.php.net/distributions/php-<version>.tar.gz
+解压并进入源码包目录 
+
+安装依赖
+	yum -y install libxml2  libxml2-devel  openssl openssl-devel curl curl-devel libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel pcre pcre-devel libxslt libxslt-devel bzip2 bzip2-devel
+
+编译安装
+	./configure --prefix=/usr/local/php --with-config-file-path=/etc/php.ini --with-curl --with-freetype-dir --with-gd --with-gettext --with-iconv-dir --with-kerberos --with-libdir=lib64 --with-libxml-dir --with-mysqli --with-openssl --with-pcre-regex --with-pdo-mysql --with-pdo-sqlite --with-pear --with-png-dir --with-jpeg-dir --with-xmlrpc --with-xsl --with-zlib --with-bz2 --with-mhash --enable-fpm --enable-bcmath --enable-libxml --enable-inline-optimization --enable-gd-native-ttf --enable-mbregex --enable-mbstring --enable-opcache --enable-pcntl --enable-shmop --enable-soap --enable-sockets --enable-sysvsem --enable-sysvshm --enable-xml --enable-zip --enable-ftp
+
+	make && make install
+
+修改配置文件
+	cp 源码包中/php.ini-development /usr/local/php/lib/php.ini
+具体修改如下：
+	error_reporting = E_ALL & ~E_NOTICE 输出调试信息和通知（可省略）
+	error_log = /usr/local/php-5.6.30/var/log/error-log.log 错误日志路径
+	date.timezone = "Asia/Shanghai" 去掉注释设置为中国时区
+	
+
+php-fpm 配置
+	cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf
+修改
+	pid=/usr/local/php/var/run/php-fpm.pid
+	error_log = /usr/local/php/var/log/php-fpm.log
+	
+	cp /usr/local/php/etc/php-fpm.d/www.conf.default  /usr/local/php/etc/php-fpm.d/www.conf
+修改
+	user = nobody 【值改为自己设置的用户，如nginx】
+	group = nobody 【值改为自己设置的用户组，如nginx】
+	catch_workers_output = yes 【取消注释】
+	
+	
+	
+#测试php-fpm配置
+	/usr/local/php/sbin/php-fpm -t
+	/usr/local/php/sbin/php-fpm -c /usr/local/php/etc/php.ini -y /usr/local/php/etc/php-fpm.conf -t
+ 
+#启动php-fpm
+	/usr/local/php/sbin/php-fpm
+	/usr/local/php/sbin/php-fpm -c /usr/local/php/etc/php.ini -y /usr/local/php/etc/php-fpm.conf
+ 
+#关闭php-fpm
+	kill -INT `cat /usr/local/php/var/run/php-fpm.pid`
+ 
+#重启php-fpm
+	kill -USR2 `cat /usr/local/php/var/run/php-fpm.pid`	
+	
+	
+	
+################################################################################	php end ################################################################################
+
+nginx安装 
+
+安装 pcre
+找版本下载
+	http://downloads.sourceforge.net/project/pcre/pcre
+ 
+以8.42为例 
+	wget http://downloads.sourceforge.net/project/pcre/pcre/8.42/pcre-8.42.tar.gz
+	tar zxvf pcre-8.42.tar.gz
+	cd pcre-8.42
+	./configure
+	make && make install
+
+	pcre-config --version
+
+nginx 安装 
+	./configure --prefix=/usr/local/nginx   --with-pcre=/opt/soft/pcre-8.42  --with-threads  --with-file-aio    --without-http_geo_module   --without-http_autoindex_module --without-http_split_clients_module   --without-http_empty_gif_module --without-http_browser_module --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module
+
+	make && make install 
+
+nginx配置
+
+pid 和 错误日志路径配置
+	location ~ \.php$ {
+	#    root           html;
+		fastcgi_pass   127.0.0.1:9000;
+		fastcgi_index  index.php;
+	#    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+		fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+		include        fastcgi_params;
+	}
+
+验证配置是否正确： 
+	/usr/local/nginx/sbin/nginx  -t
+
+
+nginx 启动 ：  
+	/usr/local/nginx/sbin/nginx
+重启 ： 
+	/usr/local/nginx/sbin/nginx -s reload
+	  
+停止：查进程号再杀死：
+	ps -ef|grep nginx
+	或 pkill -9 nginx
+	kill -QUIT `cat /usr/local/nginx/conf/nginx.conf` 路径看配置文件 
+	  
+	/usr/local/webserver/nginx/sbin/nginx -s reload            # 重新载入配置文件
+	/usr/local/webserver/nginx/sbin/nginx -s reopen            # 重启 Nginx
+	/usr/local/webserver/nginx/sbin/nginx -s stop              # 停止 Nginx
+其它
+
+	简单代理：proxy_pass http://172.16.29.149/index.php;
+
+
+################################################################################	nginx  end ################################################################################
+
+
+mysql 安装 
+
+最新版安装（目前最新的是8.0.11）
+到官网下载最新的yum 源 （ https://dev.mysql.com/downloads/repo/yum/ ）
+
+	wget https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
+
+安装yum 
+	rpm -ivh mysql80-community-release-el7-1.noarch.rpm
+
+安装mysql-server
+	yum install mysql-server
+
+启动mysql服务： systemctl status mysqld.service
+
+最新版安装会生成一个临时密码在 /var/log/mysqld.log 
+
+要登录mysql 并修改密码
+	alter user user() identified by "Abcd123...";
+
+新增一个用户并赋权
+	CREATE USER 'username'@'host' IDENTIFIED BY 'password'; 				实例 ： CREATE USER 'cat'@'%' IDENTIFIED BY 'Abcd123...';
+	GRANT privileges ON databasename.tablename TO 'username'@'host'; 		实例 ： GRANT ALL ON *.* TO 'cat'@'%';
+
+开放3306端口
+	firewall-cmd --zone=public  --add-port=3306/tcp --permanent 
+
+mysql8 客户端连接caching-sha2-password问题
+
+	ALTER USER 'cat'@'%' IDENTIFIED BY 'Abcd123...' PASSWORD EXPIRE NEVER; #修改加密规则 
+	ALTER USER 'cat'@'%' IDENTIFIED WITH mysql_native_password BY 'Ab2234...'; #更新一下用户的密码 
+	FLUSH PRIVILEGES; #刷新权限 
+
+
+旧版本	
+	设置密码
+		c:>mysql -u root
+		mysql>set password for 'root'@'localhost'=password('newpasswd');
+		mysql>set password for 'root'@'%'=password('newpasswd'); //本条可选
+		
+	更新密码
+		mysqladmin -u root password oldpass "newpass"
+		
+		或用UPDATE直接编辑user表
+	　　mysql> use mysql;
+	　　mysql> UPDATE user SET Password = PASSWORD('newpass') WHERE user = 'root';
+	　　mysql> FLUSH PRIVILEGES;
+
+	在丢失root密码的时候，可以这样
+		mysqld_safe --skip-grant-tables&
+	　　mysql -u root mysql
+	　　mysql> UPDATE user SET password=PASSWORD("new password") WHERE user='root';
+	　　mysql> FLUSH PRIVILEGES;
+	
+
+################################################################################	mysql   end ################################################################################
+
+
+
+
+
