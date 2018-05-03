@@ -67,7 +67,7 @@ nginx安装
 	pcre-config --version
 
 nginx 安装 
-	./configure --prefix=/usr/local/nginx   --with-pcre=/opt/soft/pcre-8.42  --with-threads  --with-file-aio    --without-http_geo_module   --without-http_autoindex_module --without-http_split_clients_module   --without-http_empty_gif_module --without-http_browser_module --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module
+	./configure --prefix=/usr/local/nginx   --with-pcre=/opt/soft/pcre-8.42  --with-threads  --with-file-aio --without-http_memcached_module    --without-http_geo_module   --without-http_autoindex_module --without-http_split_clients_module   --without-http_empty_gif_module --without-http_browser_module --with-http_stub_status_module --with-http_ssl_module --with-http_gzip_static_module
 
 	make && make install 
 
