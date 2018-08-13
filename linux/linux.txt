@@ -1,0 +1,43 @@
+
+关闭selinux : setenforce 0 查看 getenforce
+
+从第3000行开始，显示1000行。即显示3000~3999行
+cat filename | tail -n +3000 | head -n 1000
+
+
+显示1000行到3000行
+cat filename| head -n 3000 | tail -n +1000
+
+sed -n '5,10p' filename
+
+释放内存
+echo 1 > /proc/sys/vm/drop_caches
+0：不释放（系统默认值）
+1：释放页缓存
+2：释放dentries和inodes
+3：释放所有缓存
+
+
+
+
+查看mac地址
+cat /etc/udev/rules.d/*net*.rules
+查看pcie
+lspci
+
+
+超时命令（https://www.computerhope.com/unix/ups.htm）
+ps -eo pid,user,args,etime --sort start  | grep php
+ps -eo pid,args,etime --sort start  | grep php
+
+
+#!/bin/bash
+
+awk 'BEGIN { i=0 }{ i++ } { 
+
+	$6 | awk '{split($0,arr,",");for(i in arr) print i,arr[i] }'
+	
+
+ } END { print i }' /tmp/d
+
+

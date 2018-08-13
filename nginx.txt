@@ -1,0 +1,32 @@
+
+sub_module sub_filter 字符串替换 
+random_index 随机主页
+
+连接限制
+limit_conn_zone key zone=name:size 
+limit_conn zone number
+
+请求限制
+
+
+访问控制 
+http_access_module
+allow  
+deny 
+
+
+http_auth_basic_module 密码验证
+1.添加用户 htpasswd -c ./auth.conf allen  (回车输入密码)
+auth_basic           "closed site";
+auth_basic_user_file conf/htpasswd;
+
+
+gzip 压缩 ：Module ngx_http_gzip_module
+
+
+
+
+
+
+
+ 

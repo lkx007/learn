@@ -1,0 +1,30 @@
+swooole install
+
+
+
+
+1.git clone url
+2.cd  swooole dir ,执行phpize 生成 configure 
+3.configure --with-php-config=php-config路径 
+
+
+./configure --enable-coroutine --enable-openssl  --enable-http2  --enable-async-redis --enable-sockets --enable-mysqlnd  --with-php-config=/usr/local/php/bin/php-config
+
+4.make && make install
+5.安装完成php.ini增加一条扩展配置 extension=路径/swooole.so
+
+
+
+
+可能遇到的错误 
+没有nghttp2 library 
+wget https://github.com/nghttp2/nghttp2/releases/download/v1.30.0/nghttp2-1.30.0.tar.bz2 
+tar -jxvf nghttp2-1.30.0.tar.bz2
+
+php-m 发现swoole消失或者是通过php --ri swoole没有显示async redis client
+vi ~/.bash_profile
+在最后一行添加 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+source ~/.bash_profile
+重新编译安装swoole即可
+
+查找php.ini 路径 php --ini 

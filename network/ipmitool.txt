@@ -1,0 +1,29 @@
+
+BMC 服务器管理口死机远程http无法登陆
+ipmitool -H (BMC的管理IP地址) -I lan -U (BMC登录用户名) -P (BMC 登录用户名的密码) mc reset warm
+#lan参数 为接口连接的模式之一，远程通过网络执行的一般用lan 或lanplus，如果在本地ssh登录操作 可用open 参数
+
+
+BMC 防火墙策略配置全部拒绝导致无法访问
+登录该服务器系统后执行：
+
+ipmitool raw 0x32 0x66  #恢复默认值
+
+ipmitool lan set 1 ipsrc static  （设置ipmi ip非DHCP）
+
+ipmitool lan set 1 ipaddr 192.168.0.1（设置IPMI  地址） 
+
+ipmitool lan set 1 netmask 255.255.255.0 （设置ipmi 子网掩码）
+
+ipmitool lan set 1 defgw ipaddr 192.168.0.1 （设置ipmi 网关）
+
+ipmitool user set password 1 abcdefg      （修改ipmi 用户名1的密码）#root 修改后默认密码abcdefg
+
+ipmitool user set password 2 abcdefg      （修改ipmi 用户名2的密码）#admin 修改后默认密码abcdefg
+
+
+其它命令
+ipmitool -H (BMC的管理IP地址) -I lan -U (BMC登录用户名) -P (BMC 登录用户名的密码) sdr type 
+
+ipmitool -H (BMC的管理IP地址) -I lan -U (BMC登录用户名) -P (BMC 登录用户名的密码) sensor get ""
+

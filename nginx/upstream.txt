@@ -1,0 +1,7 @@
+upstream 服务器池
+
+后端WEB服务器上配置多个虚拟主机时，需要用该header来来区分反向代理那个主机名
+proxy_set_header HOST $host;
+
+
+proxy_set_header X-Forwarded-For  $remote_add;

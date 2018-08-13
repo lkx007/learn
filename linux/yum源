@@ -1,0 +1,8 @@
+更换yum源
+mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bar
+转到源目录，按照自己的版本下载源，我是CentOS 7，使用命令：
+cd /etc/yum.repos.d/
+wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
+运行以下命令生成缓存：
+yum.repos.d]# yum clean all
+yum.repos.d]# yum makecache

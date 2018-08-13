@@ -1,0 +1,63 @@
+存储过程
+
+ 删除存储过程 ：DROP PROCEDURE [过程1[,过程2…]]
+
+ 国际惯例
+ 1.hello world 
+#hello world 
+DELIMITER //
+	CREATE PROCEDURE hello()
+		BEGIN
+			DECLARE say VARCHAR(100);
+			SET say='hello world!' ;
+			SELECT say ;
+		END;
+	//
+DELIMITER ;
+
+
+测试： CALL hello();
+
+2.
+#IF-THEN-ELSE
+DROP PROCEDURE IF EXISTS proc_if;
+DELIMITER //
+	CREATE PROCEDURE proc_if(IN username VARCHAR(20),IN hobby INT )
+		BEGIN
+			DECLARE var VARCHAR(20);
+			IF hobby=0 THEN
+				SET var='read';
+			ELSEIF hobby=1 THEN
+				SET var='singing';
+			ELSE
+				SET var='play';
+			END IF ;
+			INSERT INTO user (`name`,hobby) VALUES(username,var);
+		END ;
+		//
+DELIMITER ;
+调用：CALL proc_if('cat',1);
+
+
+句未不要漏了写;
+
+mysql 
+实践证明存储过程在大量查询时没有优势，我用的是简单存储过程select比sql慢点
+人个理解应用场景是在一条sql查询得不到结果的情况下，这时存储过程会比较合适
+
+
+
+
+#删除重复记录,保存Id最大的一条
+DELIMITER //
+	CREATE PROCEDURE remove_same()
+		BEGIN
+			delete	from  `subject` where title in (
+				SELECT a.title from (SELECT title from `subject` group by   title HAVING COUNT(*) > 1 ) as a
+			)
+			and id not in (
+				select b.id from (SELECT min(id) as id ,title from `subject` group by  title HAVING COUNT(*) > 1 ) as b
+			);
+		END ;
+		//
+DELIMITER ;

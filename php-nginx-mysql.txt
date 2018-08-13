@@ -4,10 +4,10 @@ php install
 解压并进入源码包目录 
 
 安装依赖
-	yum -y install libxml2  libxml2-devel  openssl openssl-devel curl curl-devel libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel pcre pcre-devel libxslt libxslt-devel bzip2 bzip2-devel
+	yum -y install libxml2  libxml2-dev  openssl openssl-dev curl curl-dev libjpeg libpng libpng-dev freetype freetype-dev pcre pcre-dev libxslt libxslt-dev bzip2 bzip2-dev gettext gettext-dev automake autoconf libtool make intl linux-headers
 
 编译安装
-	./configure --prefix=/usr/local/php --with-config-file-path=/etc/php.ini --with-curl --with-freetype-dir --with-gd --with-gettext --with-iconv-dir --with-kerberos --with-libdir=lib64 --with-libxml-dir --with-mysqli --with-openssl --with-pcre-regex --with-pdo-mysql --with-pdo-sqlite --with-pear --with-png-dir --with-jpeg-dir --with-xmlrpc --with-xsl --with-zlib --with-bz2 --with-mhash --enable-fpm --enable-bcmath --enable-libxml --enable-inline-optimization --enable-gd-native-ttf --enable-mbregex --enable-mbstring --enable-opcache --enable-pcntl --enable-shmop --enable-soap --enable-sockets --enable-sysvsem --enable-sysvshm --enable-xml --enable-zip --enable-ftp
+	./configure --prefix=/usr/local/php --with-config-file-path=/etc/php --with-curl --with-freetype-dir --with-gd --with-gettext --with-iconv-dir --with-kerberos --with-libdir=lib64 --with-libxml-dir --with-mysqli --with-openssl --with-pcre-regex --with-pdo-mysql --with-pdo-sqlite --with-pear --with-png-dir --with-jpeg-dir --with-xmlrpc --with-xsl --with-zlib --with-bz2 --with-mhash --enable-fpm --enable-bcmath --enable-libxml --enable-inline-optimization --enable-gd-native-ttf --enable-mbregex --enable-mbstring --enable-opcache --enable-pcntl --enable-shmop --enable-soap --enable-sockets --enable-sysvsem --enable-sysvshm --enable-xml --enable-zip --enable-ftp
 
 	make && make install
 
@@ -35,11 +35,11 @@ php-fpm 配置
 	
 #测试php-fpm配置
 	/usr/local/php/sbin/php-fpm -t
-	/usr/local/php/sbin/php-fpm -c /usr/local/php/etc/php.ini -y /usr/local/php/etc/php-fpm.conf -t
+	/usr/local/php/sbin/php-fpm -c /usr/local/php/lib/php.ini -y /usr/local/php/etc/php-fpm.conf -t
  
 #启动php-fpm
 	/usr/local/php/sbin/php-fpm
-	/usr/local/php/sbin/php-fpm -c /usr/local/php/etc/php.ini -y /usr/local/php/etc/php-fpm.conf
+	/usr/local/php/sbin/php-fpm -c /usr/local/php/lib/php.ini -y /usr/local/php/etc/php-fpm.conf
  
 #关闭php-fpm
 	kill -INT `cat /usr/local/php/var/run/php-fpm.pid`
@@ -161,10 +161,20 @@ mysql8 客户端连接caching-sha2-password问题
 	　　mysql -u root mysql
 	　　mysql> UPDATE user SET password=PASSWORD("new password") WHERE user='root';
 	　　mysql> FLUSH PRIVILEGES;
+
+如果是mariadb 
+	systemctl start mariadb	
 	
 
 ################################################################################	mysql   end ################################################################################
 
+
+查看php使用配置文件路径和编译的参数
+php -i | grep php.ini
+
+清除编译过程中产生的文件
+#make clean
+#make distclean
 
 
 

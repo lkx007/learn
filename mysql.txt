@@ -1,0 +1,28 @@
+1.MySQL.. ERROR! The server quit without updating PID file (/var/lib/mysql/run/mysql.pid)
+	查看错误日志：  Attempted to open a previously opened tablespace. Previous tablespace zabbix_proxy/maintenances uses space ID: 2 at filepath: ./zabbix_proxy/maintenances.ibd. Cannot open tablespace mysql/innodb_index_stats which uses space ID: 2 at filepath: ./mysql/innodb_index_stats.ibd
+	错误原因：mysql没有正常关闭，造成了zabbix_proxy这个数据库的一些异常，
+	解决办法： innoDB强制覆盖：在my.cnf 配置增加  innodb_force_recovery= 1，然后删除log里边的mysql-bin.index（如果有）。重启
+	
+2.mysql  mysql日志盘满了，不能写，
+		解决办法：日志清空  。  reset master;  设置日志缓存时间：expire_logs_days = 7 （日志保存7天）。 如果不需要日志可以注释掉 log-bin=mysql-bin 这一行
+		
+	
+	mysql> SELECT concat('KILL ',id,';') FROM information_schema.processlist WHERE user='root' INTO OUTFILE '/tmp/a.txt';
+	mysql> source /tmp/a.txt;
+	
+	
+	update user set password=password('zabbix') where user='zabbix' and host='%';
+	
+	
+	
+create schema zabbix character set utf8
+create user 'zabbix'@'localhost' identified by 'zabbix'
+grant all privileges on zabbix.* to 'zabbix'@'%' identified by 'zabbix'
+grant all on $DBName .* to 'zabbix'@'%'
+flush privileges
+
+
+
+source /home/zabbix/LWSetup/packages/zabbix-3.4.7/database/mysql/schema.sql
+source /home/zabbix/LWSetup/packages/zabbix-3.4.7/database/mysql/images.sql
+source /home/zabbix/LWSetup/packages/zabbix-3.4.7/database/mysql/data.sql

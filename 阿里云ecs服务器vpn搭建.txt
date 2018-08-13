@@ -1,0 +1,133 @@
+##############################服务器端开始################################
+安装 shadowsocks
+https://blog.csdn.net/liuqinglong_along/article/details/52463200
+
+yum install python-pip  
+pip install shadowsocks 
+
+创建配置文件shadowsocks.json
+服务器端（我的阿里云）
+/etc/shadowsocks.json 
+{  
+    "server":"0.0.0.0",  
+    "server_port":443,  
+    "local_address":"127.0.0.1",  
+    "local_port":1080,  
+    "password":"cat2234",  
+    "timeout":300,  
+    "method":"aes-256-cfb",  
+    "fast_open":false,  
+    "workers":5  
+} 
+
+启动shadowsocks
+sslocal -c /etc/shadowsocks.json 
+
+##############################服务器端结束################################
+
+
+
+##############################客户端开始################################
+安装 shadowsocks （https://blog.csdn.net/liuqinglong_along/article/details/52463200）
+yum install python-pip  
+pip install shadowsocks 
+
+客户端 shadowsocks 配置（参数要与服务器一致）
+ /etc/shadowsocks.json 
+{  
+    "server": "阿里云地址",  
+    "server_port": 443,  
+    "local_address": "127.0.0.1",  
+    "local_port": 1080,  
+    "password": "密码",  
+    "timeout": 600,  
+    "method": "aes-256-cfb",  
+    "fast_open": false  
+}
+ 
+
+
+
+安装polipo，进行二次转发  （https://blog.csdn.net/weixin_37939964/article/details/78939914）
+yum install git
+git clone https://github.com/jech/polipo.git
+cd polipo
+git checkout polipo-1.1.1
+
+安装：
+
+make all
+su -c 'make install'
+
+若，make cc : 命令未找到：
+make install gcc 
+make install gcc-c++
+
+若，make : makeinfo : 命令未找到：
+yum install texinfo
+建立配置文件：
+mkdir /opt/polipo
+touch /var/log/polipo.log
+
+
+配置 vim /opt/polipo/config
+	logSyslog = true
+	socksParentProxy = "127.0.0.1:1080"
+	socksProxyType = socks5
+	logFile = /var/log/polipo.log
+	logLevel = 4
+	proxyAddress = "0.0.0.0"
+	proxyPort = 8123
+	chunkHighMark = 50331648
+	objectHighMark = 16384
+
+	serverMaxSlots = 64
+	serverSlots = 16
+	serverSlots1 = 32
+
+
+新建启动脚本 
+vim /usr/lib/systemd/system/polipo.service
+
+	[Unit]
+	Description=polipo web proxy
+	After=network.target
+
+	[Service]
+	Type=simple
+	WorkingDirectory=/tmp
+	User=root
+	Group=root
+	ExecStart=/usr/soft/polipo/polipo -c /opt/polipo/config
+	Restart=always
+	SyslogIdentifier=Polipo
+
+	[Install]
+	WantedBy=multi-user.target
+
+打开防火墙：
+
+firewall-cmd --permanent --add-port=8123/tcp
+firewall-cmd --reload
+
+关闭SELINUX
+
+vi /etc/selinux/config
+SELINUX=disable
+
+启动：
+systemctl start polipo.service
+
+开机启动
+systemctl enable polipo
+
+设置环境变量（可添加至~/.bashrc文件中使所有shell均可实现全局SOCKS5访问）
+export http_proxy="http://127.0.0.1:8123"  
+export https_proxy="https://127.0.0.1:8123"
+
+curl www.google.com.hk
+
+##############################客户端结束################################
+
+
+

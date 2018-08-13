@@ -1,0 +1,6 @@
+lrzsz
+	linux 上传和下载工具：rz 上传  sz 下截
+
+pcre： perl 兼容的正则表达式库
+
+

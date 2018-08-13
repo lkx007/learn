@@ -1,0 +1,17 @@
+deletet和truncate区别
+
+delete和truncate区别如下：
+
+一、灵活性：delete可以条件删除数据，而truncate只能删除表的所有数据；
+
+delete from table_test where ... 
+
+truncate table table_test 
+
+二、效率：delete效率低于truncate，delete是一行一行地删除，truncate整体删除（速度较快，会重建表结构
+
+三、事务：truncate是DDL语句，需要drop权限，因此会隐式提交，不能够rollback；delete是DML语句，可以使用rollback回滚。
+
+四、触发器：truncate 不能触发任何Delete触发器，但是会重置Identity（标识列、自增字段），相当于自增列会被置为初始值，又重新从1开始记录，而不是接着原来的ID数。而delete可以触发delete触发器，Identity依旧是接着被删除的最近的那一条记录ID加1后进行记录
+
+五、truncate不写服务器log，delete写服务器log，也就是truncate效率比delete高的原因。

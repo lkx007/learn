@@ -1,0 +1,18 @@
+yii2 
+
+
+composer install 
+	curl -sS https://getcomposer.org/installer | php
+	mv composer.phar /usr/local/bin/composer
+
+install 
+	composer create-project --prefer-dist yiisoft/yii2-app-basic basic
+
+
+安装完成可以选择的一些配置
+php yii serve --port=8888	
+
+可以会遇到的问题
+	Vendor 没有，原因是：composer-asset-plugin没有安装或者版本太低，执行下面两条命令 
+		composer global require "fxp/composer-asset-plugin:~1.1.1"
+		composer require fxp/composer-asset-plugin

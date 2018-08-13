@@ -1,0 +1,30 @@
+yum -y  install   net-snmp-perl  net-snmp-python net-snmp-utils   
+
+
+trap 
+	1.在源码目录中复制Perl的脚本并赋予执行权限
+	# cp ./misc/snmptrap/zabbix_trap_receiver.pl /usr/bin
+	# chmod a+x /usr/bin/zabbix_trap_receiver.pl
+	
+	2.找到snmptrapd的配置文件并修改
+	# find / -name snmptrapd.conf
+	找到文件后打开并修改
+	# vim snmptrapd.conf
+	添加两行代码
+	authCommunity execute public
+	perl do "/usr/bin/zabbix_trap_receiver.pl"
+	
+	3.修改zabbix_server.conf文件，启动snmptrap的功能
+	# vim /usr/local/zabbix/etc/zabbix_server.conf
+	# StartSNMPTrapper=1 将这里设为1
+	# SNMPTrapperFile=/tmp/zabbix_traps.tmp 
+	(注：最后一行的路径必须跟 /usr/bin/zabbix_trap_receiver.pl脚本中设置的路径相同)
+	
+	4.重启zabbix_server服务
+	# service zabbix_server restart
+
+	5.启动snmptrapd服务
+	# snmptrapd -C -c /etc/snmp/snmptrapd.conf
+	
+	6.添加主机，snmp 端口162
+	

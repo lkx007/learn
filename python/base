@@ -1,0 +1,34 @@
+python 乱码 带有u
+需要要转码 "str" . encode('utf8')
+
+
+ 
+setup 安装
+python setup.py install --record files.txt 记录安装后文件的路径
+cat files.txt | xargs rm -rf  删除这些文件
+
+pip 安装 
+pip install 软件
+pip uninstall 软件
+pip install -U 软件   （更新） 
+
+
+错误 
+python3: error while loading shared libraries: libpython3.5m.so.1.0: cannot open shared object file:
+这在错误原因，是centos系统默认加载/usr/lib,/lib下面库文件，python默认安装到非此类文件夹。不过可以通过添加库配置信息
+步骤如下：
+	-> cd  /etc/ld.so.conf.d
+	->vim python3.conf  （一般是没这个文件的，给这个文件增加下面这一条配置就可以了）
+	->编辑 添加库文件路径 /opt/Python3.5/lib
+	->退出保存
+	->运行ldconfig
+
+
+pip update
+python -m pip install --upgrade pip
+
+
+
+
+
+
