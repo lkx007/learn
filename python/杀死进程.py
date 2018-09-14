@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 import os
 
@@ -29,3 +28,7 @@ os.system(command)
 
 # 杀死php 进程进程
 */5 * * * * /usr/bin/python /usr/local/src/kill_php_script.py
+
+chmod  a+x kill_php_script.py
+
+service crond restart

@@ -8,7 +8,7 @@ swooole install
 3.configure --with-php-config=php-config路径 
 
 
-./configure --enable-coroutine --enable-openssl  --enable-http2  --enable-async-redis --enable-sockets --enable-mysqlnd  --with-php-config=/usr/local/php/bin/php-config
+./configure --enable-coroutine --enable-openssl  --enable-http2 --enable-openssl --enable-async-redis --enable-sockets --enable-mysqlnd --enable-async-httpclient --with-php-config=/usr/local/php/bin/php-config
 
 4.make && make install
 5.安装完成php.ini增加一条扩展配置 extension=路径/swooole.so

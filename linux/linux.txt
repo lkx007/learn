@@ -41,3 +41,20 @@ awk 'BEGIN { i=0 }{ i++ } {
  } END { print i }' /tmp/d
 
 
+
+旧的防火墙
+iptables -I INPUT  -p tcp  --dport 10050 -m comment --comment "zabbix_agentd listen" -j ACCEPT
+iptables -I OUTPUT  -p tcp  --dport 10050 -m comment --comment "zabbix_agentd listen" -j ACCEPT
+
+iptables -I INPUT  -p udp  --dport 623 -m comment --comment "ipmi listen" -j ACCEPT
+iptables -I OUTPUT  -p udp  --dport 623 -m comment --comment "ipmi listen" -j ACCEPT
+
+
+iptables -A OUTPUT -p udp --sport 623 -m state --state ESTABLISHED -j ACCEPT
+
+
+僵尸进程 
+ps -A -o stat,ppid,pid,cmd | grep -e '^[Zz]'
+
+
+https://hg.mozilla.org/projects/nss

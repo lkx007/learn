@@ -21,7 +21,7 @@ pip install shadowsocks
 } 
 
 启动shadowsocks
-sslocal -c /etc/shadowsocks.json 
+nohup  sslocal -c /etc/shadowsocks.json &
 
 ##############################服务器端结束################################
 
@@ -86,8 +86,8 @@ touch /var/log/polipo.log
 	serverSlots1 = 32
 
 
-新建启动脚本 
-vim /usr/lib/systemd/system/polipo.service
+新建启动脚本 /usr/lib/systemd/system/polipo.service
+vim /
 
 	[Unit]
 	Description=polipo web proxy

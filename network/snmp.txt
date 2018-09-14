@@ -3,6 +3,7 @@ yum -y  install   net-snmp-perl  net-snmp-python net-snmp-utils
 
 trap 
 	1.在源码目录中复制Perl的脚本并赋予执行权限
+	cp  `find / -name zabbix_trap_receiver.pl`  /usr/bin
 	# cp ./misc/snmptrap/zabbix_trap_receiver.pl /usr/bin
 	# chmod a+x /usr/bin/zabbix_trap_receiver.pl
 	

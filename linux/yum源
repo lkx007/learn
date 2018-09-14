@@ -6,3 +6,19 @@ wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
 运行以下命令生成缓存：
 yum.repos.d]# yum clean all
 yum.repos.d]# yum makecache
+
+
+
+本地yum 
+1.增加目录 mkdir  /media/centos6.5_1
+2.挂载上去： mount -o loop  /tmp/centos(本地文件)  /media/centos6.5_1(挂载的目录)
+3.查看使用的yum 源 yum repolist  如http
+4.修改 vim /etc/yum.repos.d/http
+baseurl=file:///media/centos6.5_1/
+        file:///media/centos6.5_2/
+
+gpgcheck=0  
+enabled=1
+		 
+5.yum clean all
+6.yum makecache

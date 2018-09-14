@@ -27,3 +27,7 @@ ipmitool -H (BMC的管理IP地址) -I lan -U (BMC登录用户名) -P (BMC 登录
 
 ipmitool -H (BMC的管理IP地址) -I lan -U (BMC登录用户名) -P (BMC 登录用户名的密码) sensor get ""
 
+
+ipmitool -I lanplus  -H 10.240.240.10 -U admin -P admin   fru print  0 | grep 'Product Serial' | awk -F ':' '{print $2}'
+
+Ipmitool bmc reset cold   BMC 热启动

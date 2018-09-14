@@ -1,0 +1,20 @@
+1.调整内核参数，/proc/sys/vm/swapiness  设为0
+echo 0 > /proc/sys/vm/swappiness
+/proc/sys/vm/swappiness的内容改成0（临时），/etc/sysctl.conf上添加vm.swappiness=0（永久）
+sysctl -p
+
+2.调整mysql参数，innodb_flush_method
+innodb_flush_method=O_DIRECT
+
+3.加mysql配置参数memlock,将mysql锁定在内存重防止被swapping out
+这个参数会强迫mysqld进程的地址空间一直被锁定在物理内存上，对于os来说是非常霸道的一个要求。必须要用root帐号来启动MySQL才能生效
+memlock
+
+4.手动释放swap空间，swapoff /xx/xx  和swapon /xx/xx
+
+
+
+mysql
+innodb_flush_method=O_DIRECT
+memlock
+innodb_file_per_table=1

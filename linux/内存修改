@@ -1,0 +1,11 @@
+最大文件句柄
+当前shell 有效，临时有效
+查看 	ulimit -a
+修改 ulimit -n 2048
+永久有效
+	vim  /etc/security/limits.conf 加入下面两行
+	* soft nofile 8192
+	* hard nofile 8192
+
+
+内核修改	/etc/sysctl.conf:	
