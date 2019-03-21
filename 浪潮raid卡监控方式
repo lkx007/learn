@@ -1,0 +1,3 @@
+浪潮raid卡监控方式
+1.megacli 工具，需要本地安装，获取的信息多
+2.DiagInfoCollect 工具，可以收集远程日志

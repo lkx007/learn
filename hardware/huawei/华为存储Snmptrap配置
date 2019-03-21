@@ -1,0 +1,16 @@
+admin/ITCloud2017!
+
+文档地址：
+http://support.huawei.com/enterprise/zh/doc/EDOC1000153446
+存储系统中，SNMP默认的读团体字为“storage_public”，写团体字为“storage_private”
+
+
+1.开启snmp v1v2
+change snmp version v1v2c_switch=On
+2.设置团体名
+change snmp community read_community=ITCread12# write_community=ITCwrit12#
+
+change snmp community read_community=storage_public write_community=storage_private
+
+
+

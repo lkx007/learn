@@ -1,0 +1,33 @@
+hds-vsp-gx00
+
+
+命名空间：root/hitachi/smis
+端口：5989
+pywbem:>=0.8
+
+properties
+
+user = 'maintenance'
+password = 'raid-maintenance'
+cluster = '10.242.48.81'
+namespace = 'root/hitachi/smis' 
+
+
+import pywbem,getopt, sys, datetime, time, calendar, json,os,math
+
+conn = pywbem.WBEMConnection('https://'+cluster, (user, password), namespace,None,None,None,True)
+conn.debug = True
+stats = conn.EnumerateInstances('HITACHI_StoragePool')
+
+
+大概的关系，比IBM的V7000多阵列组，可能是v7000没有设置阵列组吧
+
+disk -> raid -> pool -> luns  ->  host group  -> host
+
+
+阵列组
+HITACHI_ArrayGroup
+
+
+lun
+HITACHI_LDEVExtent

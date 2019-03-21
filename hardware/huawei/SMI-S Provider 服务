@@ -1,0 +1,208 @@
+SMI-S Provider 服务 启动或停止
+host:/home/eSDK/smisprovider/conf # ./stop_agent.sh
+host:/home/eSDK/smisprovider/conf #./start_agent.sh
+
+命名空间：
+root/huawei
+CIM Interop名字空间：root/PG_Interop
+阵列受管资源的名字空间：root/huaweisymantec
+
+查看支持信息：
+https://www.snia.org/ctp/conforming_providers/hw
+
+
+默认帐号密码：smis_admin/Admin@12
+
+起用slp 服务 ：SLP服务广播WBEM服务。当开启SLP服务，第三方程序可以发现SMI-S Provider服务
+host:/home/eSDK/smisprovider/conf # ./start_slp.sh
+
+
+import getopt, sys, datetime, time, calendar, json,os,math,pywbem
+
+pywbem.WBEMConnection('https://'+self.ip, (self.user, self.pwd), Vsp.namespace,None,None,None,True)
+
+conn = pywbem.WBEMConnection('https://10.142.88.7', ('smis_admin', 'Admin@12'), 'root/huawei',None,None,None,True)
+r = conn.EnumerateInstances('HuaSy_StorageSystem')
+
+r = conn.EnumerateInstances('HuaSy_DiskDrive')
+
+
+from pywbem import WBEMConnection, WBEMServer, ValueMapping
+conn = pywbem.WBEMConnection('https://10.142.88.7', ('smis_admin', 'Admin@12'))
+server = WBEMServer(conn)
+
+CIM Interop 命名空间  interop
+阵列受管资源命名空间： root/huawei
+
+
+
+CIM_SoftwareIdentity 版本厂商信息 可不用
+HuaSy_StorageSystem  有基本信息
+HuaSy_StorageControllerSystem 控制器
+HuaSy_ArrayProduct 有基本信息
+HuaSy_ArrayChassis 有基本信息
+HuaSy_EnclosureChassis 15个未知
+HuaSy_MaskingSCSIProtocolController 4 映射视图
+HuaSy_MemberOfCollection
+
+HuaSy_StorageHardwareID启动器
+HuaSy_StorageClientSettingData 主机类型
+
+HuaSy_AuthorizedPrivilege fc wwpn/iqn
+HuaSy_MaskingSCSIProtocolController LUN 视图
+
+
+hw_6800v3_discovery[{$USER},{$PASSWORD},{$IP},{HOST.HOST},"fcport"]
+hw_6800v3_collect[{$IP},{$USER},{$PASSWORD},{HOST.HOST},{$PROXY},"msg"]
+
+
+
+
+/usr/bin/python /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "10.142.88.7" --user "smis_admin" --password 'Admin@12' --hostname 'NM-XX-A5403-F05-01U_46U-HW-6800V3-B01' --serial '210235982610J1000002'   --discovery-types "fcport"
+
+
+
+/usr/bin/python /usr/local/zabbix/huawei/hwv3_wbem.py  --cluster "10.142.88.7" --user "smis_admin" --password 'Admin@12' --hostname 'NM-XX-A5403-F05-01U_46U-HW-6800V3-B01'   --proxy "10.142.88.7" --serial '210235982610J1000002' --fun "msg"
+
+
+
+
+show smis status
+
+change smis status status=start
+
+change smis status status=stop
+
+show slp status
+
+change slp status status=start
+
+change slp status status=stop
+
+
+
+
+LUN  
+	所属池，归属控制器，工作控制器
+
+
+
+
+
+88.4 最新版本可以
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageVolume')不用命名空间也可以
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageVolume','root/huawei')
+for cs_path in cs_paths:
+...     cs_inst = conn.GetInstance(cs_path)
+...     p = cs_inst.path
+...     d = conn.Associators(p,'HuaSy_OrderedMemberOfCollection','HuaSy_DeviceMaskingGroup')
+...     if len(d)>0:
+...             print d,d[0]['ElementName']
+
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageVolume')
+for cs_path in cs_paths:
+...     cs_inst = conn.GetInstance(cs_path)
+...     d = conn.Associators(cs_inst.path,'HuaSy_AllocatedFromStoragePool','HuaSy_ConcreteStoragePool')
+...     if len(d)>0:
+...             print d,d[0]['ElementName']
+
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_DiskExtent')
+for cs_path in cs_paths:
+...     cs_inst = conn.GetInstance(cs_path)
+...     d = conn.Associators(cs_inst.path,'HuaSy_ConcreteComponent','HuaSy_PrimordialStoragePool')
+...     if len(d)>0:
+...             print d,d[0]['ElementName']
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageHardwareID')
+for cs_path in cs_paths:
+...     cs_inst = conn.GetInstance(cs_path)
+...     d = conn.Associators(cs_inst.path,'HuaSy_ElementSettingData','HuaSy_StorageClientSettingData')
+...     if len(d)>0:
+...             print d,d[0]['ElementName']
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageHardwareID')
+for cs_path in cs_paths:
+...     cs_inst = conn.GetInstance(cs_path)
+...     d = conn.Associators(cs_inst.path,'HuaSy_MemberOfCollection','HuaSy_InitiatorMasKingGroup')
+...     if len(d)>0:
+...             print d,d[0]['ElementName']
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageHardwareID')
+for cs_path in cs_paths:
+...     cs_inst = conn.GetInstance(cs_path)
+...     d = conn.Associators(cs_inst.path,'HuaSy_AuthorizedSubject','HuaSy_AuthorizedPrivilege')
+...     if len(d)>0:
+...             print d,d[0]['ElementName']
+
+
+AssociatorNames()
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageHardwareID')
+for cs_path in cs_paths:
+	cs_inst = conn.GetInstance(cs_path)
+	t1 = conn.AssociatorNames(cs_inst.path,'HuaSy_AuthorizedSubject','HuaSy_AuthorizedPrivilege')
+	if len(t1)>0:
+		t2 = conn.AssociatorNames(t1[0],'HuaSy_AuthorizedTarget','HuaSy_MaskingSCSIProtocolController')
+		if t2:
+			t3 = conn.Associators(t2[0],'HuaSy_ProtocolControllerForUnit','HuaSy_StorageVolume')
+			if t3:
+				luns = []
+				for t in t3:
+					luns.appen(t['ElementName'])
+
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_InitiatorMasKingGroup')
+for cs_path in cs_paths:
+	cs_inst = conn.GetInstance(cs_path)
+	d = conn.Associators(cs_inst.path,'HuaSy_MemberOfCollection','HuaSy_StorageHardwareID')
+	if d:
+
+
+
+
+
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_StorageVolume')
+for cs_path in cs_paths:
+	cs_inst = conn.GetInstance(cs_path)
+	t1 = conn.AssociatorNames(cs_inst.path,'HuaSy_ProtocolControllerForUnit','HuaSy_MaskingSCSIProtocolController')
+	if t1:
+		t2 = conn.AssociatorNames(t1[0],'HuaSy_AuthorizedTarget','HuaSy_AuthorizedPrivilege') # 多个
+		names = set()
+		for o in t2:
+			t3 = conn.Associators(o,'HuaSy_AuthorizedSubject','HuaSy_StorageHardwareID')
+			names.add(t3[0]['ElementName'])
+		print cs_path['ElementName'],'---',names
+
+
+
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_FrontEndFCPort')
+for cs_path in cs_paths:
+	cs_inst = conn.GetInstance(cs_path) 
+	t1 = conn.AssociatorNames(cs_inst.path,'HuaSy_ProtocolControllerForPort','HuaSy_FCSCSIProtocolEndpoint')
+
+
+
+cs_paths = conn.EnumerateInstanceNames('HuaSy_FCSCSIProtocolEndpoint')
+for cs_path in cs_paths:
+	cs_inst = conn.GetInstance(cs_path) 
+	t1 = conn.AssociatorNames(cs_inst.path,'HuaSy_SAPAvailableForElement','HuaSy_FCSCSIProtocolEndpoint')

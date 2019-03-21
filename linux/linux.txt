@@ -5,6 +5,7 @@
 cat filename | tail -n +3000 | head -n 1000
 
 
+
 显示1000行到3000行
 cat filename| head -n 3000 | tail -n +1000
 
@@ -29,6 +30,8 @@ lspci
 超时命令（https://www.computerhope.com/unix/ups.htm）
 ps -eo pid,user,args,etime --sort start  | grep php
 ps -eo pid,args,etime --sort start  | grep php
+
+ ps -eo pid,tty,user,comm,lstart,etime | grep php
 
 
 #!/bin/bash
@@ -58,3 +61,21 @@ ps -A -o stat,ppid,pid,cmd | grep -e '^[Zz]'
 
 
 https://hg.mozilla.org/projects/nss
+
+
+iptables -I INPUT  -p udp  --dport 162 -m comment --comment "snmptrapd listen" -j ACCEPT
+iptables -I OUTPUT  -p udp  --dport 162 -m comment --comment "snmptrapd listen" -j ACCEPT
+
+
+查找打包压缩
+find ./ -maxdepth 1    -iname "*.gz"   |xargs  tar czvf g.tar.gz
+
+
+批量解压
+ls *.tar.gz | xargs -n1 tar xzvf
+
+
+perl -MCPAN -e shell
+o conf init
+o conf init urllist
+install Net::IP

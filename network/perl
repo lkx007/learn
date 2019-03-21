@@ -1,0 +1,6 @@
+#!/usr/bin/perl
+
+open(FH, ">/tmp/aa.txt") or die $!; 
+print FH "hello\n";#向文件写入内容
+print FH "OK\n";
+close(FH);

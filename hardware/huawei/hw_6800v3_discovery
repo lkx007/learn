@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# 'Hostname' of the host which will collect data
+HOSTNAME=$3
+#
+SVC_USER=$1
+#
+SVC_PWD=$2
+#
+D_HOSTNAME=$4
+
+SERIAL=$5
+
+D_TYPE=$6
+
+/usr/bin/python /usr/local/zabbix/hw/hwv3_discovery.py  --clusters "$HOSTNAME" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$D_HOSTNAME" --serial "$SERIAL"  --discovery-types "$D_TYPE"

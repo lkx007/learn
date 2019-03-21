@@ -1,0 +1,18 @@
+查看 raid卡版本
+lspci -v |grep -i -E 'LSI|RAID'
+
+此工具包有版本
+2208/ 2308/ 3008/ 3108/
+
+用以下命令可以找到
+3108 是这个
+InfoCollect_Linux/InfoCollect_Linux/modules/raid/RAIDtool/3108/opt/MegaRAID/storcli/storcli64 /c0/eall/sall show all
+其它的查看帮忙手册
+
+3008  
+sas3ircu  
+
+
+
+
+

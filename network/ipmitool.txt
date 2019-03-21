@@ -31,3 +31,18 @@ ipmitool -H (BMC的管理IP地址) -I lan -U (BMC登录用户名) -P (BMC 登录
 ipmitool -I lanplus  -H 10.240.240.10 -U admin -P admin   fru print  0 | grep 'Product Serial' | awk -F ':' '{print $2}'
 
 Ipmitool bmc reset cold   BMC 热启动
+
+
+ipmitool -H 10.242.66.84 -I lan -U admin -P ITCloud2017! mc reset warm
+
+
+
+
+ipmitool -H 192.168.150.141 -I lan -U admin -P ITCloud@123 mc reset warm
+
+
+
+
+dell  iDRAC 常用命令
+http://www.mamicode.com/info-detail-2269899.html
+http://topics-cdn.dell.com/pdf/idrac7-8-lifecycle-controller-v2.50.50.50_reference-guide_en-us.pdf

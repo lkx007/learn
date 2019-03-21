@@ -12,7 +12,9 @@ trap
 	找到文件后打开并修改
 	# vim snmptrapd.conf
 	添加两行代码
-	authCommunity execute public
+	authCommunity execute public    (说明，这个public是团体名)
+	[authCommunity execute other]    (新加一行可以加多一个团体名)
+	disableAuthorization yes
 	perl do "/usr/bin/zabbix_trap_receiver.pl"
 	
 	3.修改zabbix_server.conf文件，启动snmptrap的功能
@@ -29,3 +31,89 @@ trap
 	
 	6.添加主机，snmp 端口162
 	
+
+/usr/local/zabbix/bin/zabbix_sender  -z localhost -i /tmp/t1.txt
+
+
+
+
+snmpget -OvQ -c publix -v 2c 1.1.1.1 .1.3.6.1.4.1.9.9.16.1.1.1.16
+snmpget -OvQ -c ITCloud123 -v 2c 10.242.64.183 .1.3.6.1.4.1.232.1.2.2.1.1.3.0
+
+
+
+
+set /map1/snmp1/ readcom1=ITCloud123
+或者先进入目录 cd  /map1/snmp1 再set readcom1=ITCloud123
+重启iLo reset /map1
+
+
+
+
+测试snmptrap 地址改为127.0.0.1
+
+snmptrap -v 2c -c public 10.10.12.219 "aaa" 1.3.6.1.4.1.2345 SNMPv2-MIB::sysLocation.0 s "just here" 
+snmptrap 	命令
+-v 2c 	Snmp协议版本
+-c public 	共同体
+10.10.12.219 	snmp代理的IP
+"aaa" 	主机名称, 可以为空
+1.3.6.1.4.1.2345 	Enterprise-OID
+SNMPv2-MIB::sysLocation.0 	数据OID
+s 	数据类型
+"This is a test" 	数据值
+
+
+disableAuthorization yes
+perl do "/usr/bin/zabbix_trap_receiver.pl"
+
+
+yum list installed |grep snmp
+要有以下包
+net-snmp.x86_64 
+net-snmp-agent-libs.x86_64
+net-snmp-devel.x86_64
+net-snmp-libs.x86_64
+net-snmp-perl.x86_64
+net-snmp-python.x86_64
+net-snmp-utils.x86_64
+
+要以服务形式启动snmptrap: service snmptrapd start
+然后snmptrapd -C -c /etc/snmp/snmptrapd.conf
+
+
+测试
+snmptrap -v 1 -c public 127.0.0.1 '.1.3.6.1.6.3.1.1.5.4' '0.0.0.0' 6 33 '55' .1.3.6.1.6.3.1.1.5.4 s "eth0"
+
+
+测试实例
+snmptrap -v 2c -c public 127.0.0.1   "allen"  1.3.6.1.4.1.2345 SNMPv2-MIB::sysLocation.0  s "111111111111111"
+snmptrap -v 2c -c public 10.142.88.33   "allen"  1.3.6.1.4.1.2345 SNMPv2-MIB::sysLocation.0  s "111111111111111"
+
+
+
+
+snmpwalk  -v 3 -l authPriv -u root -a SHA -A Huawei12#$ -x AES -X Huawei12#$ 192.168.11.1 SNMPv2-SMI::enterprises
+
+snmpwalk  -v 3 -l authPriv -u root -a MD5 -A Huawei12#$ -x AES -X Huawei12#$ 192.168.11.1 SNMPv2-SMI::enterprises
+
+-l 安全等级
+noAuthNoPriv（不认证也不加密）、authNoPriv（认证但是不加密）、authPriv（既认证又加密）
+身份验证协议:MD5 | SHA
+隐私协议 : AES | DES
+
+
+
+
+snmpwalk  -v 3 -l noAuthNoPriv -u USERID  192.168.20.118
+
+
+
+
+#disableAuthorization yes
+perl do "/usr/bin/zabbix_trap_receiver.pl"perl  do "/tmp/a.pl"
+
+#traphandle default /tmp/a.sh
+traphandle default  "/tmp/a.pl"
+#
+#traphandle default   "/usr/bin/zabbix_trap_receiver.pl"

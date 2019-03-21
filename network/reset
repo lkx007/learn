@@ -1,0 +1,29 @@
+ reset /map1
+
+
+ show 
+
+
+
+ <?php
+
+$user = 'administrator';
+$pass = 'ITCloud2017!';
+$connection=ssh2_connect('10.242.58.108',22);
+ssh2_auth_password($connection,$user,$pass);
+$cmd="reset /map1";
+ssh2_exec($connection,$cmd);
+
+
+
+
+
+$user = 'administrator';
+$pass = 'ITCloud2017!';
+for ($i=80;$i<=229;$i++){
+	$ip = '10.242.58.'.$i;
+	$connection=ssh2_connect($ip,22);
+	ssh2_auth_password($connection,$user,$pass);
+	$cmd="reset /map1";
+	ssh2_exec($connection,$cmd);
+}

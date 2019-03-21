@@ -1,0 +1,5 @@
+#!/bin/bash
+# 'Hostname' of the host which will collect data
+
+
+nohup /usr/bin/python /usr/local/zabbix/huawei/hwv3_wbem.py  --cluster "$1" --user "$2" --password "$3" --hostname "$4"  --proxy "$5"    --fun "$6"  >  /dev/null 2>&1 &

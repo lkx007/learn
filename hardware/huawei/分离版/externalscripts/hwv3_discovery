@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+SVC_USER=$1
+#
+SVC_PWD=$2
+
+IP=$3
+#
+HOSTNAME=$4
+
+SERIAL=$5
+
+TYPE=$6
+
+
+
+
+nohup /usr/bin/python /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"   --discovery-types "$TYPE" >  /dev/null 2>&1 &

@@ -1,3 +1,17 @@
+这个可以用https://www.cnblogs.com/tianhei/p/7428622.html
+{
+    "server":"0.0.0.0",
+    "server_port":29999,
+    "local_port":1080,
+    "password":"cat2234",
+    "method":"aes-256-cfb",
+    "timeout":300
+}
+
+
+
+
+以下应该是少装了部分包，不可用
 ##############################服务器端开始################################
 安装 shadowsocks
 https://blog.csdn.net/liuqinglong_along/article/details/52463200
