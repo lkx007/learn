@@ -13,6 +13,15 @@ https://www.snia.org/ctp/conforming_providers/hw
 
 默认帐号密码：smis_admin/Admin@12
 
+add device 
+8088
+3
+admin
+ITCloud123!
+3
+list device 
+
+
 起用slp 服务 ：SLP服务广播WBEM服务。当开启SLP服务，第三方程序可以发现SMI-S Provider服务
 host:/home/eSDK/smisprovider/conf # ./start_slp.sh
 

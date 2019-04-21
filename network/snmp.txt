@@ -105,6 +105,9 @@ noAuthNoPriv（不认证也不加密）、authNoPriv（认证但是不加密）�
 
 
 
+
+
+
 snmpwalk  -v 3 -l noAuthNoPriv -u USERID  192.168.20.118
 
 

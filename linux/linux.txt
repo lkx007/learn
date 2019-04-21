@@ -79,3 +79,7 @@ perl -MCPAN -e shell
 o conf init
 o conf init urllist
 install Net::IP
+
+
+PATH="$PATH:/alidata/server/mysql/bin"
+PATH=$PATH:$HOME/bin:/home/work/local/python/lib/python2.5/site-packages/django/bin/:$HOME/bin:/home/work/local/mysql5/bin/;
