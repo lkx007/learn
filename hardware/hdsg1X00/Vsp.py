@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 #coding=utf-8
 
-import pywbem,getopt, sys, datetime, time, calendar, json,os,math
+import pywbem,getopt, sys, datetime, time, calendar, json,os,math,gc
 import threading
 from time import ctime,sleep
 
@@ -17,7 +17,6 @@ class Vsp:
 	cacheFile = None
 	content = ''
 
-
 	def __init__(self, ip,user,pwd,host,port,proxy,fun,smis_port):
 		self.ip = ip
 		self.user = user
@@ -28,7 +27,7 @@ class Vsp:
 		self.fun = fun
 		if smis_port:
 			self.smis_port = smis_port
-		else
+		else:
 			self.smis_port = 5989
 
 		self.conn = self.connect()
@@ -43,7 +42,8 @@ class Vsp:
 		self.hostGroupWithHostRelation = None
 
 
-
+		if not os.path.exists('/tmp/hds/'):
+			os.makedirs('/tmp/hds/',0777);
 
 
 		self.cacheFile = '/tmp/hds/hds' + self.ip
@@ -63,7 +63,7 @@ class Vsp:
 
 
 	def msg(self):
-		arr1 = ['getLunDict','getHostDict','getHostGroupDict','getFcDict','getDiskDict','getHostGroupWithPortRelation','getHostGroupWithLunRelation','getHostGroupWithHostRelation','poolMsg','raidMsg','sysinfoMsg']
+		arr1 = ['getLunDict','getHostDict','getHostGroupDict','getFcDict','getDiskDict','poolMsg','raidMsg','sysinfoMsg']
 		threads = []
 
 
@@ -84,20 +84,7 @@ class Vsp:
 
 
 
-		#========== 获取所有信息 start ==================
-		"""
-		self.lunDict = self.getLunDict()
-		self.hostDict = self.getHostDict()
-		self.hostGroupDict = self.getHostGroupDict()
-		self.fcDict = self.getFcDict()
-
-		self.hostGroupWithPortRelation = self.getHostGroupWithPortRelation()#主机组和端口关系
-		self.hostGroupWithLunRelation = self.getHostGroupWithLunRelation()#主机组和LUN关系
-		self.hostGroupWithHostRelation = self.getHostGroupWithHostRelation()#主机组和主机关系
-		"""
-		#===========获取所有信息 end  ==================
-
-		arr2 = ['lunMsg','fcportMsg','hostMsg','hostGroupMsg','hostGroupLunMsg','diskMsg','hsotGroupFcportMsg','hostWithHostGroupMsg','BatteryMsg']
+		arr2 = ['lunMsg','fcportMsg','hostMsg','hostGroupMsg','hostGroupLunMsg','LunHostGroupMsg','diskMsg','hsotGroupFcportMsg','FcportHsotGroupMsg','hostWithHostGroupMsg','hostWithLunMsg','hostWithFcMsg','BatteryMsg']
 
 		t2 = []
 
@@ -113,18 +100,6 @@ class Vsp:
 		for i in t2:
 			i.join()
 
-		"""
-		self.poolMsg()
-		self.raidMsg()
-		self.lunMsg()
-		self.diskMsg()
-		self.fcportMsg()
-		self.hostMsg()
-		self.hostGroupMsg()
-		self.hostGroupLunMsg()
-		self.hsotGroupFcportMsg()
-		self.hostWithHostGroupMsg()
-		"""
 
 	def performance(self):
 		self.fcSpeedPerf()
@@ -136,7 +111,7 @@ class Vsp:
 
 
 	def connect(self):
-		 return pywbem.WBEMConnection('https://'+self.ip+':'+self.smis_port, (self.user, self.pwd), Vsp.namespace,None,None,None,True)
+		 return pywbem.WBEMConnection('https://' + self.ip + ':' + str(self.smis_port), (self.user, self.pwd), Vsp.namespace,None,None,None,True)
 
 
 	def send_to_zabbix(self):
@@ -163,6 +138,8 @@ class Vsp:
 				self.composeContent('pool.capacity.size.reserved[{id}]'.format(id=id), x['ReservedSpace']) #
 				self.composeContent('pool.capacity.size.free[{id}]'.format(id=id), x['RemainingManagedSpace']) # 
 				self.composeContent('pool.capacity.size.total[{id}]'.format(id=id), x['TotalManagedSpace']) #
+		del data
+		gc.collect()
 
 	def raidMsg(self):
 		print "采集RAID信息"
@@ -175,16 +152,19 @@ class Vsp:
 				self.composeContent('raid.desc[{id}]'.format(id=id), x['ElementName'])
 				self.composeContent('raid.size.total[{id}]'.format(id=id), x['TotalManagedSpace']) 
 				self.composeContent('raid.status[{id}]'.format(id=id), x['HealthState']) 
+		del data
+		gc.collect()
 
 		data = self.conn.EnumerateInstances('HITACHI_ArrayGroup')
 		for x in data:
 			if len(x):
 				id = '-' .join ( x['DeviceID'].split('.') )
 				id = 'raid_' + id
-				self.composeContent('raid.block.size[{id}]'.format(id=id), x['BlockSize']) 
-				self.composeContent('raid.number.blocks[{id}]'.format(id=id), x['NumberOfBlocks']) 
+				self.composeContent('raid.blocks.size[{id}]'.format(id=id), x['BlockSize']) 
+				self.composeContent('raid.blocks.number[{id}]'.format(id=id), x['NumberOfBlocks']) 
 				self.composeContent('raid.level[{id}]'.format(id=id), x['ErrorMethodology']) 
-
+		del data
+		gc.collect()
 	def lunMsg(self):
 		print "采集LUN信息"
 		#data = self.conn.EnumerateInstances('HITACHI_StorageVolume')
@@ -197,17 +177,18 @@ class Vsp:
 				#id = 'lun_' + x['DeviceID']
 				self.composeContent('lun.id[{id}]'.format(id=id), x['DeviceID']) 
 				self.composeContent('lun.raid.level[{id}]'.format(id=id), x['ErrorMethodology']) 
-				self.composeContent('lun.local[{id}]'.format(id=id), x['Caption']) 
+				#self.composeContent('lun.local[{id}]'.format(id=id), x['Caption'])#不要了 
 				self.composeContent('lun.name[{id}]'.format(id=id), x['ElementName'])
 				self.composeContent('lun.desc[{id}]'.format(id=id), x['Description'])
 				self.composeContent('lun.size.total[{id}]'.format(id=id), x['NumberOfBlocks'] * x['BlockSize']) 
 				self.composeContent('lun.status[{id}]'.format(id=id), x['HealthState']) 
+		del data
+		gc.collect()
 
 	def diskMsg(self):
 		print "采集DISK信息"
 		#data = self.conn.EnumerateInstances('HITACHI_DiskDrive')
 		data = self.diskDict
-
 		for d in data:
 			x = data[d]
 			if len(x):
@@ -224,6 +205,8 @@ class Vsp:
 				self.composeContent('disk.type[{id}]'.format(id=id), x['DiskType'])
 				if x.__contains__('RPM'):
 					self.composeContent('disk.speed[{id}]'.format(id=id), x['RPM'])
+		del data
+		gc.collect()
 
 		data =  self.conn.EnumerateInstances('HITACHI_DiskDriveView')
 		for x in data:
@@ -236,6 +219,8 @@ class Vsp:
 				self.composeContent('disk.blocks.size[{id}]'.format(id=id), x['SEBlockSize'])
 				self.composeContent('disk.blocks[{id}]'.format(id=id), x['SENumberOfBlocks'])
 				self.composeContent('disk.serial[{id}]'.format(id=id), x['PPSerialNumber'])
+		del data
+		gc.collect()
 
 	def fcportMsg(self):
 		print "采集FC PORT信息"
@@ -251,6 +236,8 @@ class Vsp:
 				self.composeContent('fcif.type[{id}]'.format(id=id), x['PortType'])
 				self.composeContent('fcif.name[{id}]'.format(id=id), x['ElementName'])
 				self.composeContent('fcif.status[{id}]'.format(id=id), x['HealthState'])
+		del data
+		gc.collect()
 
 	def hostGroupMsg(self):
 		#data = self.conn.EnumerateInstances('HITACHI_SCSIProtocolController')
@@ -262,19 +249,20 @@ class Vsp:
 				id = x['ElementName']
 				self.composeContent('storagehg.type[{id}]'.format(id=id), x['HostMode'])
 				self.composeContent('storagehg.name[{id}]'.format(id=id), x['ElementName'])
-
+		del data
+		gc.collect()
 
 	def hostMsg(self):
 		print "采集HOST信息"
 		#data = self.conn.EnumerateInstances('HITACHI_StorageHardwareID')
 		data = self.hostDict
-
 		for d in data:
 			x = data[d]
 			id = x['StorageID']
 			#self.composeContent('storagehost.id[{id}]'.format(id=id), x['InstanceID'])
 			self.composeContent('storagehost.port.wwn[{id}]'.format(id=id), x['StorageID'])
-
+		del data
+		gc.collect()
 
 	def sysinfoMsg(self):
 		data = self.conn.EnumerateInstances('HITACHI_StoragePoolPrimordial')
@@ -286,7 +274,8 @@ class Vsp:
 			self.composeContent('dev.serial', data[0]['IdentifyingNumber'])
 			self.composeContent('dev.product.version', data[0]['Version'])
 			self.composeContent('dev.mfc', data[0]['Vendor'])
-
+		del data
+		gc.collect()
 
 	def BatteryMsg(self):
 		data = self.conn.EnumerateInstances('HITACHI_Battery')
@@ -294,140 +283,143 @@ class Vsp:
 			id = x['DeviceID']
 			self.composeContent('battery.name[{id}]'.format(id=id), x['Name'])
 			self.composeContent('battery.status[{id}]'.format(id=id), x['HealthState']) # 状态 5 是OK 
+		del data
+		gc.collect()
 
 
 
-	"""
-	补充主机组的下的所有LUN名称
-	补充LUN下的所有主机组
-	"""
+	#补充主机组的下的所有LUN名称
 	def hostGroupLunMsg(self):
-		relation = self.hostGroupWithLunRelation
+		print "采集主机组下的LUN信息"
+		hostGroupDict = self.hostGroupDict
+		source = self.conn.EnumerateInstanceNames('HITACHI_SCSIProtocolController')
+		for s in source:
+			k=s['DeviceID']
+			name = hostGroupDict[k]['ElementName']
+			cs_inst = self.conn.GetInstance(s)
+			dmsg = self.conn.Associators(cs_inst.path,'HITACHI_SCSIPCForStorageVolume','HITACHI_StorageVolume')
+			tmp = set()
+
+			for x in dmsg:
+				tmp.add(x['ElementName'])
+			self.composeContent('storagehg.mapped.luns[{id}]'.format(id=name),json.dumps(list(tmp)))
+
+
+	#补充LUN下的所有主机组
+	def LunHostGroupMsg(self):
+		print "采集LUN下的主机组信息"
 		lunDict = self.lunDict
-		hostGroupDict = self.hostGroupDict
-		#补充主机组的下的所有LUN名称
-		if relation['hg']:
-			hg = relation['hg']
-			for x in hg:
-				tmp = hostGroupDict[x]
-				k = tmp['ElementName']
-				print k
-				lunNames = self.getAllLunsNameByLunId(hg[x],lunDict)
-				self.composeContent('storagehg.mapped.luns[{id}]'.format(id=k),lunNames)
-		#补充LUN下的所有主机组
-		if relation['lun']:
-			lun = relation['lun']
-			for x in lun:
-				tmp = lunDict[x]
-				k = tmp['Description'].split('.')[-1]
-				hostNames = self.getAllHostGroupNameByHostGroupId(lun[x],hostGroupDict)
-				self.composeContent('lun.mapped.hostgroups[{id}]'.format(id=k),hostNames)
+		source = self.conn.EnumerateInstanceNames('HITACHI_StorageVolume')
+		for s in source:
+			k=s['DeviceID']
+			name = lunDict[k]['ElementName']
+			cs_inst = self.conn.GetInstance(s)
+			dmsg = self.conn.Associators(cs_inst.path,'HITACHI_SCSIPCForStorageVolume','HITACHI_SCSIProtocolController')
+			tmp = set()
+			for x in dmsg:
+				tmp.add(x['ElementName'])
+			self.composeContent('lun.mapped.hostgroups[{id}]'.format(id=name),json.dumps(list(tmp)))
 
-	"""
-	补充主机组的 fc端口信息
-	补充FC端口的  主机组信息
-	"""
+
+	#补充主机组的 fc端口信息
 	def hsotGroupFcportMsg(self):
-		relation = self.hostGroupWithPortRelation
+		print "采集主机组的光纤端口信息"
 		hostGroupDict = self.hostGroupDict
+		source = self.conn.EnumerateInstanceNames('HITACHI_SCSIProtocolController')
+		for s in source:
+			k=s['DeviceID']
+			name = hostGroupDict[k]['ElementName']
+			cs_inst = self.conn.GetInstance(s)
+			dmsg = self.conn.Associators(cs_inst.path,'HITACHI_SCSIPCForFCPort','HITACHI_FCPort')
+			wwns = set()
+			names = set()
+			for x in dmsg:
+				wwns.add(x['DeviceID'])
+				names.add(x['ElementName'])
+			self.composeContent('storagehg.mapped.ports.wwpns[{id}]'.format(id=name),json.dumps(list(wwns)))
+			self.composeContent('storagehg.mapped.ports[{id}]'.format(id=name),json.dumps(list(names)))
+
+	#补充FC端口的  主机组信息
+	def FcportHsotGroupMsg(self):
+		print "采集光纤端口的主机组信息"
 		fcDict = self.fcDict
-		#补充主机组的 fc端口信息
-		if relation['hg']:
-			hg = relation['hg']
-			for x in hg:
-				tmp = hostGroupDict[x]
-				k = tmp['ElementName']
-				names = []
-				wwns = []
-				for i in hg[x]:
-					wwns.append(fcDict[i]['DeviceID'])
-					names.append(fcDict[i]['ElementName'])
-				self.composeContent('storagehg.mapped.ports.wwpns[{id}]'.format(id=k),json.dumps(wwns))
-				self.composeContent('storagehg.mapped.ports[{id}]'.format(id=k),json.dumps(names))
+		source = self.conn.EnumerateInstanceNames('HITACHI_FCPort')
+		for s in source:
+			k=s['DeviceID']
+			name = fcDict[k]['ElementName']
+			cs_inst = self.conn.GetInstance(s)
+			dmsg = self.conn.Associators(cs_inst.path,'HITACHI_SCSIPCForFCPort','HITACHI_SCSIProtocolController')
+			names = set()
+			for x in dmsg:
+				names.add(x['ElementName'])
+			self.composeContent('fcif.mapped.hostgroups[{id}]'.format(id=name),json.dumps(list(names)))
 
-		#补充FC端口的  主机组信息
-		if relation['port']:
-			port = relation['port']
-			for x in port:
-				names = []
-				tmp = fcDict[x]
-				k = tmp['ElementName']
-				for i in port[x]:
-					names.append(hostGroupDict[i]['ElementName'])
-				self.composeContent('fcif.mapped.hostgroups[{id}]'.format(id=k),json.dumps(names))
-
-	"""
-	补充主机的 主机组信息
-	补充主机组的  主机信息
-	"""
+	#主机与主机组的信息
 	def hostWithHostGroupMsg(self):
-		relation = self.hostGroupWithHostRelation
-		hgDict = self.hostGroupDict
-		portDict = self.fcDict
-		#补充主机的 主机组信息
-		if relation['host']:
-			host = relation['host']
-			for x in host:
-				names  = []#主机组的名称
-				# fc 信息
-				portNames = []#主机连接本存储的端口
-				portWWNs = []#主机连接本存储的wwn
-				# lun 信息
-				lunNames = [] #lun 名称
-
-				#关系全部要从主机组找
-				for i in host[x]:
-					names.append(hgDict[i]['ElementName'])
-
-					portIDs = self.hostGroupWithPortRelation['hg'][i]
-					for p in portIDs:
-						fc = portDict[p]
-						portNames.append(fc['ElementName'])
-						portWWNs.append(fc['DeviceID'])
-
-					lunIDs = self.hostGroupWithLunRelation['hg'][i]
-					for l in lunIDs:
-						lunNames.append(self.lunDict[l]['ElementName'])
-				self.composeContent('storagehost.hostgroup.name[{id}]'.format(id=x),json.dumps(names))
-				self.composeContent('storagehost.mapped.ports[{id}]'.format(id=x), json.dumps(portNames)) 
-				self.composeContent('storagehost.mapped.ports.wwpns[{id}]'.format(id=x), json.dumps(portWWNs))
-				self.composeContent('storagehost.mapped.luns[{id}]'.format(id=x), json.dumps(lunNames))
-
-		#补充主机组的  主机信息
-		""" 删除了
+		print "采集主机属于那些主机组信息"
 		hostDict = self.hostDict
-		if relation['hg']:
-			hg = relation['hg']
-			for x in hg:
-				names  = []
-				for i in hg[x]:
-					k = 'host_group_' + x
-					names.append(hostDict[i]['ElementName'].split(' ')[-1])
-				self.composeContent('host.group.hosts[{id}]'.format(id=k),json.dumps(names))
-		"""
+		source = self.conn.EnumerateInstanceNames('HITACHI_StorageHardwareID')
+		for s in source:
+			k= s['InstanceID'].split(".")[-1]
+			name = hostDict[k]['ElementName']
+			cs_inst = self.conn.GetInstance(s)
+			#主机 属于主机组
+			t1 = self.conn.AssociatorNames(cs_inst.path,'HITACHI_AuthorizedSubject','HITACHI_AuthorizedPrivilege')
+			if len(t1)>0:
+				t2 = self.conn.Associators(t1[0],'HITACHI_AuthorizedTarget','HITACHI_SCSIProtocolController')
+				tmp = set()
+				#可能会以属于多个组
+				for x in t2:
+					tmp.add(x['ElementName'])
+				self.composeContent('storagehost.hostgroup.name[{id}]'.format(id=name),json.dumps(list(tmp)))
+
+	#主机与Lun的信息
+	def hostWithLunMsg(self):
+		print "采集主机下所有LUN信息"
+		hostDict = self.hostDict
+		source = self.conn.EnumerateInstanceNames('HITACHI_StorageHardwareID')
+		for s in source:
+			k= s['InstanceID'].split(".")[-1]
+			name = hostDict[k]['ElementName']
+			cs_inst = self.conn.GetInstance(s)
+			#主机 下所有LUN
+			tmp = set()
+			t1 = self.conn.AssociatorNames(cs_inst.path,'HITACHI_AuthorizedSubject','HITACHI_AuthorizedPrivilege')
+			for t11 in t1:
+				t2 = self.conn.AssociatorNames(t11,'HITACHI_AuthorizedTarget','HITACHI_SCSIProtocolController')
+				#可能会以属于多个组
+				for t22 in t2:
+					t3 = self.conn.Associators(t22,'HITACHI_SCSIPCForStorageVolume','HITACHI_StorageVolume')
+					if t3:
+						tmp.add(t3['ElementName'])
+			self.composeContent('storagehost.mapped.luns[{id}]'.format(id=name),json.dumps(list(tmp)))
 
 
-
-
-
-	"""返回lun 名称json 
-	"""
-	def getAllLunsNameByLunId(self,lunIDs,lunDict):
-		names = []
-		if lunDict and lunIDs:
-			for x in lunIDs:
-				name = lunDict[x]['ElementName'].split('.')[-1]
-				names.append(name)
-		return json.dumps(names)
-
-	"""返回 hostgroup名称json 
-	"""
-	def getAllHostGroupNameByHostGroupId(self,hgIDs,hostGroupDict):
-		names = []
-		if hgIDs and hostGroupDict:
-			for x in hgIDs:
-				names.append(hostGroupDict[x]['ElementName'])
-		return json.dumps(names)
+	#主机与FC端口的信息
+	def hostWithFcMsg(self):
+		print "采集主机下所有的光纤端口信息"
+		hostDict = self.hostDict
+		source = self.conn.EnumerateInstanceNames('HITACHI_StorageHardwareID')
+		for s in source:
+			k= s['InstanceID'].split(".")[-1]
+			name = hostDict[k]['ElementName']
+			cs_inst = self.conn.GetInstance(s)
+			#主机 下所有 FC 端口
+			ports = set()
+			wwpns = set()
+			t1 = self.conn.AssociatorNames(cs_inst.path,'HITACHI_AuthorizedSubject','HITACHI_AuthorizedPrivilege')
+			for t11 in t1:
+				t2 = self.conn.AssociatorNames(t11,'HITACHI_AuthorizedTarget','HITACHI_SCSIProtocolController')
+				#可能会以属于多个组
+				for t22 in t2:
+					t3 = self.conn.AssociatorNames(t22,'HITACHI_SCSIProtocolEndpointAvailableForProtocolController','HITACHI_SCSIProtocolEndpoint')
+					for t33  in t3:
+						t4 = self.conn.Associators(t22,'HITACHI_FCPortForSCSIProtocolEndpointImplementation','HITACHI_FCPort')
+						if t4:
+							ports.add(t4['ElementName'])
+							wwpns.add(t4['DeviceID'])
+			self.composeContent('storagehost.mapped.ports[{id}]'.format(id=name),json.dumps(list(ports)))
+			self.composeContent('storagehost.mapped.ports.wwpns[{id}]'.format(id=name),json.dumps(list(wwpns)))
 
 
 	#============================返回字典 start =========================
@@ -490,89 +482,6 @@ class Vsp:
 	#****************************************************************
 	#****************************************************************
 
-	#=================返回关系 start ===============================
-
-	"""
-	返回主机组的端口的关系 hg = [端口ID]  多对一
-	返回端口的主机组的关系 port = [hg]  一对多
-	"""
-	def getHostGroupWithPortRelation(self):
-		hg = {}
-		port = {}
-		data = self.conn.EnumerateInstances('HITACHI_SCSIPCForFCPort')
-		if data:
-			for x in data:
-				portID = str( x['Dependent']['DeviceID'] )
-				hgID = str( x['Antecedent']['DeviceID'] )
-				if not  hg.has_key(hgID):
-					hg[hgID] = []
-				hg[hgID].append(portID)
-
-				if not port.has_key(portID):
-					port[portID ] = []
-				port[portID ].append(hgID)
-
-		self.hostGroupWithPortRelation = {'hg':hg,'port':port}
-
-	""" 主机组和主机的关系
-	主机组 hg = [host]
-	主机  host = [hg]
-	"""
-	def getHostGroupWithHostRelation(self):
-		hg = {}
-		host = {}
-		data = self.conn.EnumerateInstances('HITACHI_AuthorizedTarget')
-		if data:
-			for x in data:
-				hostID = str( x['Privilege']['InstanceID'].split('.')[-1] )
-				hgID = str( x['TargetElement']['DeviceID'] )
-				if not  hg.has_key(hgID):
-					hg[hgID] = []
-				hg[hgID].append(hostID)
-
-				if not host.has_key(hostID):
-					host[hostID ] = []
-				host[hostID ].append(hgID)
-
-		self.hostGroupWithHostRelation = {'hg':hg,'host':host}
-
-
-	"""
-	主机组和LUN的关系，多对多关系
-	组装成两个数组 hg = [所有LUN ID]  lun = [所有hostgroup ID]
-	"""
-	def getHostGroupWithLunRelation(self):
-		hg = {}
-		lun = {}
-		data = self.conn.EnumerateInstances('HITACHI_SCSIPCForStorageVolume')
-		if data:
-			for x in data:
-				hgID = str( x['Antecedent']['DeviceID'] )
-				lunID = str( x['Dependent']['DeviceID'] )
-				if not  hg.has_key(hgID):
-					hg[hgID] = []
-				hg[hgID].append(lunID)
-
-				if not lun.has_key(hgID):
-					lun[lunID ] = []
-				lun[lunID].append(hgID)
-
-		self.hostGroupWithLunRelation = {'hg':hg,'lun':lun}
-
-
-	# 主机组和FC端口的关系  [主机组ID] = [端口ID]
-	def getHgRelationPortDict(self):
-		hgRelationPortDict = {}
-		relation = self.conn.EnumerateInstances('HITACHI_SCSIPCForFCPort')
-		for x in relation:
-			if len(x):
-				id = x['Antecedent']['DeviceID']  #主机组
-				hgRelationPortDict[id] = x['Dependent']['DeviceID']  # 端口
-		return hgRelationPortDict
-
-
-	#=================返回关系 end =================================
-
 
 
 	"""
@@ -609,7 +518,8 @@ class Vsp:
 					#发送到ZABBIX
 					self.composeContent('fcif.inout[{id}]'.format(id=id), KBytesTransferred )
 		self.cache['fcport'] = new
-
+		del data
+		gc.collect()
 		"""
 		lun I/O信息
 		"""
@@ -657,7 +567,21 @@ class Vsp:
 					if WriteIOs > 0:
 						self.composeContent('lun.write.io.hit[{id}]'.format(id=id), WriteHitIOs/WriteIOs*100)
 		self.cache['lun'] = new
-
+		del data
+		gc.collect()
 
 	def saveCache(self):
 		json.dump(self.cache, open(self.cacheFile, 'w') )
+
+"""
+if __name__ == '__main__':
+	cluster='10.244.48.18'
+	user='maintenance'
+	password='GZ@cloud2018!'
+	port='10050'
+	proxy='10.236.9.57'
+	fun='msg'
+	smis_port='5989'
+	hostname='GZ-XXY-A4_101-E04-03U_35U-HIT-HDS_VSP_G400-B01'
+	Vsp(cluster,user,password,hostname,port,proxy,fun,smis_port)
+"""

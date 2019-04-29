@@ -46,3 +46,10 @@ ipmitool -H 192.168.150.141 -I lan -U admin -P ITCloud@123 mc reset warm
 dell  iDRAC 常用命令
 http://www.mamicode.com/info-detail-2269899.html
 http://topics-cdn.dell.com/pdf/idrac7-8-lifecycle-controller-v2.50.50.50_reference-guide_en-us.pdf
+
+
+racadm set iDRAC.SNMP.Alert.5.Enable 1
+racadm set iDRAC.SNMP.Alert.5.DestIpAddr  10.240.10.183
+racadm set iDRAC.SNMP.Alert.5.DestAddr  10.240.10.183
+
+racadm get iDRAC.SNMP.Alert.<index>

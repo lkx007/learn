@@ -114,7 +114,9 @@ snmpwalk  -v 3 -l noAuthNoPriv -u USERID  192.168.20.118
 
 
 #disableAuthorization yes
-perl do "/usr/bin/zabbix_trap_receiver.pl"perl  do "/tmp/a.pl"
+perl do "/usr/bin/zabbix_trap_receiver.pl"
+
+perl  do "/tmp/a.pl"
 
 #traphandle default /tmp/a.sh
 traphandle default  "/tmp/a.pl"
