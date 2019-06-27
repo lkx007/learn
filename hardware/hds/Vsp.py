@@ -53,7 +53,6 @@ class Vsp:
 			f = open(self.cacheFile,'w')
 			f.write('{}')
 			f.close()
-
 		item = 'self.' + fun
 		eval(item)()
 
@@ -85,7 +84,7 @@ class Vsp:
 
 
 		arr2 = ['lunMsg','fcportMsg','hostMsg','hostGroupMsg','hostGroupLunMsg','LunHostGroupMsg','diskMsg','hsotGroupFcportMsg','FcportHsotGroupMsg','hostWithHostGroupMsg','hostWithLunMsg','hostWithFcMsg','BatteryMsg']
-
+		#arr2 = ['hsotGroupFcportMsg']
 		t2 = []
 
 		for i in arr2:
@@ -102,6 +101,38 @@ class Vsp:
 
 
 	def performance(self):
+		arr2 = ['getLunDict','getFcDict','getDiskDict']
+		threads2 = []
+
+		for i in arr2:
+			print "添加线程： %s" % (i)
+			fun = 'self.' + i
+			t = threading.Thread(target=eval(fun))
+			threads2.append(t)
+
+		for t in threads2:
+			t.setDaemon(True)
+			t.start()
+			sleep(0.1)
+		for i in threads2:
+			i.join() 
+
+
+		arr1 = ['poolMsg','raidMsg','lunMsg','diskMsg','fcportMsg','BatteryMsg']
+		threads = []
+		for i in arr1:
+			print "添加线程： %s" % (i)
+			fun = 'self.' + i
+			t = threading.Thread(target=eval(fun))
+			threads.append(t)
+		for t in threads:
+			t.setDaemon(True)
+			t.start()
+			sleep(0.1)
+		for i in threads:
+			i.join() 
+
+
 		self.fcSpeedPerf()
 		self.lunPerf()
 		self.saveCache()
@@ -131,13 +162,15 @@ class Vsp:
 		for x in data:
 			if len(x):
 				id = x['ElementName']
-				self.composeContent('pool.name[{id}]'.format(id=id), x['ElementName']) #
-				self.composeContent('pool.status[{id}]'.format(id=id), x['HealthState']) #
-				self.composeContent('pool.consist[{id}]'.format(id=id), x['ConsistsOf']) #
-				self.composeContent('pool.usage[{id}]'.format(id=id), x['Usage']) #
-				self.composeContent('pool.capacity.size.reserved[{id}]'.format(id=id), x['ReservedSpace']) #
-				self.composeContent('pool.capacity.size.free[{id}]'.format(id=id), x['RemainingManagedSpace']) # 
-				self.composeContent('pool.capacity.size.total[{id}]'.format(id=id), x['TotalManagedSpace']) #
+				if self.fun == 'msg':
+					self.composeContent('pool.name[{id}]'.format(id=id), x['ElementName']) #
+					self.composeContent('pool.consist[{id}]'.format(id=id), x['ConsistsOf']) #
+					self.composeContent('pool.capacity.size.total[{id}]'.format(id=id), x['TotalManagedSpace']) #
+				else:
+					self.composeContent('pool.status[{id}]'.format(id=id), x['HealthState'])
+					self.composeContent('pool.usage[{id}]'.format(id=id), x['Usage'])
+					self.composeContent('pool.capacity.size.reserved[{id}]'.format(id=id), x['ReservedSpace']) #
+					self.composeContent('pool.capacity.size.free[{id}]'.format(id=id), x['RemainingManagedSpace'])
 		del data
 		gc.collect()
 
@@ -148,23 +181,26 @@ class Vsp:
 			if len(x):
 				arr = x['ElementName'].split('.')
 				id =  'raid_' +  arr[-1]
-				self.composeContent('raid.size.free[{id}]'.format(id=id), x['RemainingManagedSpace']) 
-				self.composeContent('raid.desc[{id}]'.format(id=id), x['ElementName'])
-				self.composeContent('raid.size.total[{id}]'.format(id=id), x['TotalManagedSpace']) 
-				self.composeContent('raid.status[{id}]'.format(id=id), x['HealthState']) 
+				if self.fun == 'msg': 
+					self.composeContent('raid.desc[{id}]'.format(id=id), x['ElementName'])
+					self.composeContent('raid.size.total[{id}]'.format(id=id), x['TotalManagedSpace']) 
+				else:
+					self.composeContent('raid.status[{id}]'.format(id=id), x['HealthState'])
+					self.composeContent('raid.size.free[{id}]'.format(id=id), x['RemainingManagedSpace'])
 		del data
 		gc.collect()
 
-		data = self.conn.EnumerateInstances('HITACHI_ArrayGroup')
-		for x in data:
-			if len(x):
-				id = '-' .join ( x['DeviceID'].split('.') )
-				id = 'raid_' + id
-				self.composeContent('raid.blocks.size[{id}]'.format(id=id), x['BlockSize']) 
-				self.composeContent('raid.blocks.number[{id}]'.format(id=id), x['NumberOfBlocks']) 
-				self.composeContent('raid.level[{id}]'.format(id=id), x['ErrorMethodology']) 
-		del data
-		gc.collect()
+		if self.fun == 'msg':
+			data = self.conn.EnumerateInstances('HITACHI_ArrayGroup')
+			for x in data:
+				if len(x):
+					id = '-' .join ( x['DeviceID'].split('.') )
+					id = 'raid_' + id
+					self.composeContent('raid.blocks.size[{id}]'.format(id=id), x['BlockSize']) 
+					self.composeContent('raid.blocks.number[{id}]'.format(id=id), x['NumberOfBlocks']) 
+					self.composeContent('raid.level[{id}]'.format(id=id), x['ErrorMethodology']) 
+			del data
+			gc.collect()
 	def lunMsg(self):
 		print "采集LUN信息"
 		#data = self.conn.EnumerateInstances('HITACHI_StorageVolume')
@@ -174,14 +210,15 @@ class Vsp:
 			if len(x):
 				tmp = x['Description'].split('.')
 				id = tmp[-1]
-				#id = 'lun_' + x['DeviceID']
-				self.composeContent('lun.id[{id}]'.format(id=id), x['DeviceID']) 
-				self.composeContent('lun.raid.level[{id}]'.format(id=id), x['ErrorMethodology']) 
-				#self.composeContent('lun.local[{id}]'.format(id=id), x['Caption'])#不要了 
-				self.composeContent('lun.name[{id}]'.format(id=id), x['ElementName'])
-				self.composeContent('lun.desc[{id}]'.format(id=id), x['Description'])
-				self.composeContent('lun.size.total[{id}]'.format(id=id), x['NumberOfBlocks'] * x['BlockSize']) 
-				self.composeContent('lun.status[{id}]'.format(id=id), x['HealthState']) 
+				if self.fun == 'msg': 
+					self.composeContent('lun.id[{id}]'.format(id=id), x['DeviceID']) 
+					self.composeContent('lun.raid.level[{id}]'.format(id=id), x['ErrorMethodology']) 
+					self.composeContent('lun.name[{id}]'.format(id=id), x['ElementName'])
+					self.composeContent('lun.desc[{id}]'.format(id=id), x['Description'])
+					self.composeContent('lun.size.total[{id}]'.format(id=id), x['NumberOfBlocks'] * x['BlockSize']) 
+				else:
+					self.composeContent('lun.status[{id}]'.format(id=id), x['HealthState'])
+
 		del data
 		gc.collect()
 
@@ -192,35 +229,34 @@ class Vsp:
 		for d in data:
 			x = data[d]
 			if len(x):
-				#id = 'disk_' + x['DeviceID']
 				id = x['Location']
-				usage = 'spare'
-				if 0 == x['DeviceID'].find('-'):
-					usage = 'data'
-				self.composeContent('disk.local[{id}]'.format(id=id), x['Location'])
-				#self.composeContent('disk.function[{id}]'.format(id=id), usage)
-				self.composeContent('disk.size.total[{id}]'.format(id=id), x['MaxMediaSize'])
-				self.composeContent('disk.desc[{id}]'.format(id=id), ',' . join( x['CapabilityDescriptions']))
-				self.composeContent('disk.status[{id}]'.format(id=id), x['HealthState'])
-				self.composeContent('disk.type[{id}]'.format(id=id), x['DiskType'])
-				if x.__contains__('RPM'):
-					self.composeContent('disk.speed[{id}]'.format(id=id), x['RPM'])
+				if self.fun == 'msg':
+					self.composeContent('disk.local[{id}]'.format(id=id), x['Location'])
+					#self.composeContent('disk.function[{id}]'.format(id=id), usage)
+					self.composeContent('disk.size.total[{id}]'.format(id=id), x['MaxMediaSize'])
+					self.composeContent('disk.desc[{id}]'.format(id=id), ',' . join( x['CapabilityDescriptions']))
+					self.composeContent('disk.type[{id}]'.format(id=id), x['DiskType'])
+					if x.__contains__('RPM'):
+						self.composeContent('disk.speed[{id}]'.format(id=id), x['RPM'])
+				else:
+					self.composeContent('disk.status[{id}]'.format(id=id), x['HealthState'])
 		del data
 		gc.collect()
 
-		data =  self.conn.EnumerateInstances('HITACHI_DiskDriveView')
-		for x in data:
-			if len(x):
-				tmpId = x['SEDeviceID']
-				local = self.diskDict[tmpId]
-				id = local['Location']
-				#self.send_to_zabbix('disk.part.number[{id}]'.format(id=id), x['PPPartNumber']) #采集结果没有
-				self.composeContent('disk.mfc[{id}]'.format(id=id), x['PPManufacturer'])
-				self.composeContent('disk.blocks.size[{id}]'.format(id=id), x['SEBlockSize'])
-				self.composeContent('disk.blocks[{id}]'.format(id=id), x['SENumberOfBlocks'])
-				self.composeContent('disk.serial[{id}]'.format(id=id), x['PPSerialNumber'])
-		del data
-		gc.collect()
+		if self.fun == 'msg':
+			data =  self.conn.EnumerateInstances('HITACHI_DiskDriveView')
+			for x in data:
+				if len(x):
+					tmpId = x['SEDeviceID']
+					local = self.diskDict[tmpId]
+					id = local['Location']
+					#self.send_to_zabbix('disk.part.number[{id}]'.format(id=id), x['PPPartNumber']) #采集结果没有
+					self.composeContent('disk.mfc[{id}]'.format(id=id), x['PPManufacturer'])
+					self.composeContent('disk.blocks.size[{id}]'.format(id=id), x['SEBlockSize'])
+					self.composeContent('disk.blocks[{id}]'.format(id=id), x['SENumberOfBlocks'])
+					self.composeContent('disk.serial[{id}]'.format(id=id), x['PPSerialNumber'])
+			del data
+			gc.collect()
 
 	def fcportMsg(self):
 		print "采集FC PORT信息"
@@ -230,12 +266,14 @@ class Vsp:
 			x = data[d]
 			if len(x):
 				id = x['ElementName']
-				self.composeContent('fcif.port.number[{id}]'.format(id=id), x['PortNumber'])
-				self.composeContent('fcif.speed[{id}]'.format(id=id), x['Speed'])
-				self.composeContent('fcif.wwpn[{id}]'.format(id=id), x['PermanentAddress'])
-				self.composeContent('fcif.type[{id}]'.format(id=id), x['PortType'])
-				self.composeContent('fcif.name[{id}]'.format(id=id), x['ElementName'])
-				self.composeContent('fcif.status[{id}]'.format(id=id), x['HealthState'])
+				if self.fun == 'msg':
+					self.composeContent('fcif.port.number[{id}]'.format(id=id), x['PortNumber'])
+					self.composeContent('fcif.wwpn[{id}]'.format(id=id), x['PermanentAddress'])
+					self.composeContent('fcif.type[{id}]'.format(id=id), x['PortType'])
+					self.composeContent('fcif.name[{id}]'.format(id=id), x['ElementName'])
+				else:
+					self.composeContent('fcif.status[{id}]'.format(id=id), x['HealthState'])
+					self.composeContent('fcif.speed[{id}]'.format(id=id), x['Speed'])
 		del data
 		gc.collect()
 

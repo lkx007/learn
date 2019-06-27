@@ -36,6 +36,9 @@ class CH242():
 		params = urllib.urlencode(data)
 		req = urllib2.Request(url,params)
 		self.opener.open(req)
+		for item in cookie:
+			print ('Name = '+item.name)
+			print ('Value = '+item.value
 
 
 	def hardware(self):

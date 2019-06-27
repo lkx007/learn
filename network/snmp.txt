@@ -52,7 +52,7 @@ set /map1/snmp1/ readcom1=ITCloud123
 
 测试snmptrap 地址改为127.0.0.1
 
-snmptrap -v 2c -c public 10.10.12.219 "aaa" 1.3.6.1.4.1.2345 SNMPv2-MIB::sysLocation.0 s "just here" 
+snmptrap -v 2c -c public 127.0.0.1 "aaa" 1.3.6.1.4.1.2345 SNMPv2-MIB::sysLocation.0 s "just here" 
 snmptrap 	命令
 -v 2c 	Snmp协议版本
 -c public 	共同体

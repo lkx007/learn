@@ -11,6 +11,12 @@ git
 url = https://allen0817:aaaa623450@github.com/allen0817/learn.git
 
 
+关联远程库
+git remote add origin git@github.com:wangjiax9/practice.git
+
+强制上传的方式
+git push -f
+
 
 本地回退(提交了的可以退回)
 git reset --hard 53544(git hash号，不用写完)

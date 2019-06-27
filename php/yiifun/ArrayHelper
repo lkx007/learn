@@ -1,0 +1,45 @@
+把返回的数据集转换成Tree
+list_to_tree($list, $pk = 'id', $pid = 'pid', $child = '_child', $root = 0)
+
+将list_to_tree的树还原成列表
+tree_to_list($tree, $child = '_child', $order = 'id', &$list = [])
+
+对查询结果集进行排序
+list_sort_by($list, $field, $sortby = 'asc')
+
+递归方式将tree结构转化为 表单中select可使用的格式
+format_tree($tree, $title = 'title', $level = 0)
+
+获取dropDownList的data数据，主要是二级栏目及以上数据，一级栏目可以用ArrayHelper::map()生成
+listDataLevel($list, $key, $value, $pk = 'id', $pid = 'pid', $root = 0)
+
+生成jQuery tree所需的数据
+jstree($list)
+
+数组的key和value互换 php原函数array_filp，但yii是用自己的逻辑实现的
+exchange($array)
+
+返回数组第一个元素
+first($arr)
+
+返回数组最后一个元素 php原函数end(),yii也是调用此函数
+last($arr)
+
+排除指定key
+except($array, array $keys)
+
+仅返回期望key
+expect($array, array $keys)
+
+将数组转换成字符串
+arrayToString($arr, $haskey = true)
+
+PHP stdClass Object转array
+object_array($array)
+
+将form表单格式化成数组
+serializeArray($arr)
+
+
+查询出数组中指定值的数据
+selectArray($arr, $field = '', $keyword, $like = true)

@@ -11,6 +11,8 @@ CIM Interop名字空间：root/PG_Interop
 https://www.snia.org/ctp/conforming_providers/hw
 
 
+telnet 5989 不需要通
+
 默认帐号密码：smis_admin/Admin@12
 
 add device 
@@ -93,6 +95,8 @@ change slp status status=stop
 
 LUN  
 	所属池，归属控制器，工作控制器
+
+
 
 
 

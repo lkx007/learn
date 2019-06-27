@@ -1,0 +1,203 @@
+依赖注入
+服务定位器
+
+YII 服务定位器+依赖注入（初始化创建了一个容器要，可以把自己的类注入到这个容器）
+serviceLocator->创建一个公共容器->注册一个容器
+Yii::createObject() 是调用了DI容器的 yii\di\Container::get() 来向 Yii::$container 索要实例的
+
+注册容器方式：
+$container = new \yii\di\Container;
+
+
+依赖注入
+	比如果Comment类里需要调用邮件工具
+	工厂模式
+	$this->_eMailSender = MyEmailSender::getInstance(); //或者其它邮件工具类
+	只能在类里实例化具体邮件工具类
+	======================================================================
+	依赖注入
+	把一个类作为参数传入到另一个实例
+	或用属性注入方法，把一个类作为另一个类的属性
+
+	sender1 = new GmailSender();
+	sender2 = new MyEmailSender();
+
+	// 用构造函数将GmailSender注入 把邮件工具类注入到Comment类里，在实例Comment时选择邮件工具，
+	好处没有污染Comment类，解耦程度比工厂模式好。
+	缺点要解决依赖关系，一层层注入，代码量多
+	$comment1 = new Comment(sender1);
+	// 使用Gmail发送邮件
+	$comment1.save();
+
+
+1.
+	// 直接以类名注册一个依赖，虽然这么做没什么意义。
+	// $_definition['yii\db\Connection'] = 'yii\db\Connetcion'
+	$container->set('yii\db\Connection');
+2.
+	// 注册一个接口，当一个类依赖于该接口时，定义中的类会自动被实例化，并供
+	// 有依赖需要的类使用。
+	// $_definition['yii\mail\MailInterface', 'yii\swiftmailer\Mailer']
+	$container->set('yii\mail\MailInterface', 'yii\swiftmailer\Mailer');
+3.
+	// 注册一个别名，当调用$container->get('foo')时，可以得到一个
+	// yii\db\Connection 实例。
+	// $_definition['foo', 'yii\db\Connection']
+	$container->set('foo', 'yii\db\Connection');
+4.
+	// 用一个配置数组来注册一个类，需要这个类的实例时，这个配置数组会发生作用。
+	// $_definition['yii\db\Connection'] = [...]
+	$container->set('yii\db\Connection', [
+	    'dsn' => 'mysql:host=127.0.0.1;dbname=demo',
+	    'username' => 'root',
+	    'password' => '',
+	    'charset' => 'utf8',
+	]);
+
+ 	使用应该是这样： $container->get('yii\db\Connection')->fun()
+
+5.
+	// 用一个配置数组来注册一个别名，由于别名的类型不详，因此配置数组中需要
+	// 有 class 元素。
+	// $_definition['db'] = [...]
+	$container->set('db', [
+	    'class' => 'yii\db\Connection',
+	    'dsn' => 'mysql:host=127.0.0.1;dbname=demo',
+	    'username' => 'root',
+	    'password' => '',
+	    'charset' => 'utf8',
+	]);
+6.
+	// 用一个PHP callable来注册一个别名，每次引用这个别名时，这个callable都会被调用。
+	// $_definition['db'] = function(...){...}
+	$container->set('db', function ($container, $params, $config) {
+	    return new \yii\db\Connection($config);
+	});
+7.
+	// 用一个对象来注册一个别名，每次引用这个别名时，这个对象都会被引用。
+	// $_definition['pageCache'] = anInstanceOfFileCache
+	$container->set('pageCache', new FileCache);
+
+例子：
+// 为邮件服务定义抽象层
+interface EmailSenderInterface
+{
+    public function send(...);
+}
+// 定义Gmail邮件服务
+class GmailSender implements EmailSenderInterface
+{
+    // 实现发送邮件的类方法
+    public function send(...)
+    {
+    }
+}
+
+===============工厂模式 start==============
+// 定义评论类
+class Comment extend yii\db\ActiveRecord
+{
+    // 用于引用发送邮件的库
+    private $_eMailSender;
+    // 初始化时，实例化 $_eMailSender
+    public function init()
+    {
+        // 这里假设使用Gmail的邮件服务
+       $this->_eMailSender = GmailSender::getInstance();
+    }
+    // 当有新的评价，即 save() 方法被调用之后中，会触发以下方法
+    public function afterInsert()
+    {
+        $this->_eMailSender->send(...);
+    }
+}
+比如果Comment类里需要调用邮件工具
+工厂模式
+$this->_eMailSender = MyEmailSender::getInstance(); //或者其它邮件工具类
+只能在类里实例化具体邮件工具类
+===============工厂模式 stop==============
+
+
+===============依赖注入 start==============
+// 这是构造函数注入的例子
+class Comment extend yii\db\ActiveRecord
+{
+    // 用于引用发送邮件的库
+    private $_eMailSender;
+
+    // 构造函数注入
+    public function __construct($emailSender)
+    {
+        ...
+        $this->_eMailSender = $emailSender;
+        ...
+    }
+
+    // 当有新的评价，即 save() 方法被调用之后中，会触发以下方法
+    public function afterInsert()
+    {
+        ...
+        //
+        $this->_eMailSender->send(...);
+        ...
+    }
+}
+依赖注入
+把一个类作为参数传入到另一个实例
+或用属性注入方法，把一个类作为另一个类的属性
+
+sender1 = new GmailSender();
+sender2 = new MyEmailSender();
+
+// 用构造函数将GmailSender注入 把邮件工具类注入到Comment类里，在实例Comment时选择邮件工具，
+好处没有污染Comment类，解耦程度比工厂模式好。
+缺点要解决依赖关系，一层层注入
+$comment1 = new Comment(sender1);
+// 使用Gmail发送邮件
+$comment1.save();
+
+// 用构造函数将MyEmailSender注入
+$comment2 = new Comment(sender2);
+// 使用MyEmailSender发送邮件
+$comment2.save();
+
+
+
+我的实例
+controller 
+		//依赖注入方式
+		$test = new Test();
+		$first = new First();
+		$first->setTest($test);
+		$first->name = 'allen';
+		$first->hello();
+		echo "<br>";
+		//容器方式
+		$container = new Container();
+		$container->set('my',[
+			'class' => 'app\common\First',
+			'name' => 'allen',
+//			'test' => new Test1()
+			'test' => [
+				'class' => 'app\common\Test1'
+			]
+		]);
+		$container->get('my')->hello();
+
+first class
+class First extends  My
+{
+	public  $_test;
+	public function setTest($val){
+		if(is_object($val)) return $this->test = $val;
+		if(is_array($val))  return $this->test = new $val['class'] ;
+	}
+	public function  getTest(){
+		return $this->test;
+	}
+	public function hello(){
+		$this->setName($this->name);
+		$this->test->test();
+		return printf('hello %s',$this->name);
+	}
+}

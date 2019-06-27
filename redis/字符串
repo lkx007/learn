@@ -1,0 +1,50 @@
+set name allen EX 30  [ NX XX PX]
+EX 秒过期
+PX 毫秒过期
+NX 当键不存在里有效
+XX 当键存在时有效
+
+衍生出
+setnx,setex,psetex
+
+给键设置新值，并返回旧值，如果之前没有设置过则返回空
+getset key value 
+
+根据键返回值长度
+strlen key 
+
+字符串追加内容，如果key不存在则新建
+append key value
+
+从offset位置开始替换（offset 从0开始）
+setrange key offset value 
+
+截取字符串
+getrange key start end 
+
+整数加1
+incr key  
+
+整字减1
+decr key
+
+递增步长
+incrby key increment/decrement
+incrby a  -20
+
+递减步长
+decrby key decrement（如果是负数相当于加）
+
+
+浮点型递增（int基础增减会出现误差）
+incrbyfloat key increment/decrement
+
+设置多个键值
+mset key value [key value]
+
+设置多个键值，如果有键存在，则全部设置失败
+msetnx key value [key value]
+
+
+一次获取多个值
+mget key [key]
