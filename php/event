@@ -1,0 +1,19 @@
+event
+
+1.事件需要继承 yii\base\Event 或 yii\base\Component
+2.事件需要先绑定(on)才能使用(trigger)
+3.事件绑定方式
+	// 处理器是全局函数
+	$foo->on(Foo::EVENT_HELLO, 'function_name');
+
+	// 处理器是对象方法
+	$foo->on(Foo::EVENT_HELLO, [$object, 'methodName']);
+
+	// 处理器是静态类方法
+	$foo->on(Foo::EVENT_HELLO, ['app\components\Bar', 'methodName']);
+
+	// 处理器是匿名函数
+	$foo->on(Foo::EVENT_HELLO, function ($event) {
+	    //事件处理逻辑
+	});
+4.触发事件

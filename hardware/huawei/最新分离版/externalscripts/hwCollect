@@ -1,0 +1,8 @@
+#!/bin/bash
+# 'Hostname' of the host which will collect data
+
+
+#timeout 30m   nohup /usr/bin/python3 /usr/local/zabbix/huawei/hwv3_wbem.py  --cluster "$1" --user "$2" --password "$3" --hostname "$4"  --proxy "$5"  --serial "$6"  --fun "$7"  >  /dev/null 2>&1 &
+
+#单一台不需要序列号
+timeout 30m   nohup /usr/bin/python3 /usr/local/zabbix/huawei/hwv3_wbem.py  --cluster "$1" --user "$2" --password "$3" --hostname "$4"  --proxy "$5"  --serial "$6"  --fun "$7"  >  /dev/null 2>&1 &

@@ -1,0 +1,20 @@
+需要继承 
+yii\rest\ActiveController   与ar关联
+yii\rest\Controller
+
+public function behaviors()
+{
+	return [
+		[
+			'class' => 'yii\filters\ContentNegotiator',
+//				'only' => ['view', 'index'],  // 中能访问这几个方法
+			// 'only' => ['user/view', 'user/index']
+			'formats' => [
+				'application/json' => Response::FORMAT_JSON,
+				'application/xml' => Response::FORMAT_XML,
+			],
+			'formatParam' => 'formats',//请求带formats参数将返回formats支持的格式，如请求里 formats=xml 将返回xml格式
+//				'except' => ['index'] // 加了此参数，index方法将不能访问
+		],
+	];
+}

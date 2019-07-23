@@ -53,3 +53,7 @@ racadm set iDRAC.SNMP.Alert.5.DestIpAddr  10.240.10.183
 racadm set iDRAC.SNMP.Alert.5.DestAddr  10.240.10.183
 
 racadm get iDRAC.SNMP.Alert.<index>
+
+
+
+ipmitool -I lanplu  -H 10.242.52.60 -U admin -P ITCloud2017! chassis restart_cause

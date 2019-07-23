@@ -1,0 +1,33 @@
+#!/bin/bash
+
+SVC_USER=$1  #用户名
+SVC_PWD=$2  #密码
+IP=$3  #IP
+HOSTNAME=$4 #主机名
+#SERIAL=$5   #序列号
+TYPE=$6 #类别
+PROXY=$5  #代理
+
+echo $(date +'%Y-%m-%d %H:%M:%S')
+
+
+#/usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME"   --discovery-types "$TYPE"  --proxy "$PROXY"  
+nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME"   --discovery-types "$TYPE"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "disk"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "enclosure"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "fcport"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "host"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "host_group"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "lun"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "lun_group"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "pool"  --proxy "$PROXY"  >  /dev/null 2>&1 &
+
+#nohup /usr/bin/python3  /usr/local/zabbix/huawei/hwv3_discovery.py  --clusters "$IP" --user "$SVC_USER" --password "$SVC_PWD" --hostname "$HOSTNAME" --serial "$SERIAL"  --discovery-types "raid"  --proxy "$PROXY"  >  /dev/null 2>&1 &

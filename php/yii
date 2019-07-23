@@ -44,3 +44,6 @@ return Yii::$app->response->sendStreamAsFile($hd,'哥哥');
 return Yii::$app->response->sendFile($file);
 或
 Yii::$app->response->sendFile($file)->send();
+
+
+
